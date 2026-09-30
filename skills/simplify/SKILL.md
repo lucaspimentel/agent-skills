@@ -25,8 +25,16 @@ git diff --name-status [--cached | <target-ref>]
 
 Parse each line: the first character is the status (`M` modified, `A` added, `R` renamed, `C` copied). For `R` and `C` entries (`R100\told\tnew`), use the second path (the new one).
 
-- If the user passed an explicit file list, use only those files, treated as modified against the target ref.
-- If the file list is empty and the target is `HEAD`, fall back to `git diff --name-status HEAD~1` and use `HEAD~1` as the target ref for step 3.
+Unless `--staged` is set, also list untracked files, which `git diff` never reports:
+
+```
+git ls-files --others --exclude-standard
+```
+
+Add each untracked file with status `A` (added), so the entire file is in scope.
+
+- If the user passed an explicit file list, use only those files, treated as modified against the target ref. A listed file that is untracked is treated as added.
+- If both the diff list and the untracked list are empty and the target is `HEAD`, fall back to `git diff --name-status HEAD~1` and use `HEAD~1` as the target ref for step 3.
 - If still empty, tell the user there are no changes to simplify and stop.
 
 ## Step 3 — Compute changed line ranges
