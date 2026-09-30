@@ -70,6 +70,20 @@ This skill operates in two modes based on user intent:
 
 ## Add/update mode
 
+### Tag naming
+
+Versions are always bare (e.g. `1.2.0`), including versions passed in by callers such as the `ship` skill; never add a second `v` to an input that already has one. Build tag names from the repo's existing convention:
+
+```bash
+git tag --list 'v*'
+git tag --list '[0-9]*'
+```
+
+- If version tags use a `v` prefix, the tag for a version is `v{version}`; if they are bare, it is `{version}`.
+- If no version tags exist, default to `v{version}` and tell the user.
+
+Below, `{tag}` means the tag built this way for the version in question.
+
 ### Step 1 — Find CHANGELOG.md
 
 Glob for `**/CHANGELOG.md`. If multiple are found, ask the user which to update. If none found, offer to create one with the [Keep a Changelog](https://keepachangelog.com/) header:
@@ -85,7 +99,7 @@ Two sources, in priority order:
 1. **User-provided description** — if the user described the changes, use that directly
 2. **Git history** — if no description provided, identify changes since the last version:
    - Read the top entry in CHANGELOG.md to get the latest version number. If the changelog is empty or has only a header, treat it as a fresh changelog with no prior version.
-   - Run `git log v{latest}..HEAD --oneline` to list commits since that version (if no matching tag exists, use the entry's date with `--since=YYYY-MM-DD`; if no prior version at all, use the full log)
+   - Run `git log {tag}..HEAD --oneline` (where `{tag}` is the tag for the latest version) to list commits since that version (if no matching tag exists, use the entry's date with `--since=YYYY-MM-DD`; if no prior version at all, use the full log)
    - Summarize the changes into concise bullet points
 
 ### Step 3 — Determine version and date
@@ -124,8 +138,8 @@ If `gh` is not available or not authenticated, skip this step and inform the use
 
 If releases exist or the user explicitly asked to create/update a release:
 
-- **Existing release**: `gh release edit v{version} --notes "..."`
-- **New release**: `gh release create v{version} --title "v{version}" --notes "..."`
+- **Existing release**: `gh release edit {tag} --notes "..."`
+- **New release**: `gh release create {tag} --title "{tag}" --notes "..."`
 - Use the GitHub release format described in the Formatting section above
 - If the version's tag doesn't exist yet, inform the user that the tag must be created first (tags should be created from a specific commit, not implicitly by `gh release create`)
 

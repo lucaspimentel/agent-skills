@@ -180,4 +180,4 @@ Delegate to the `git-commit` skill.
 Update the GitHub release that CI created from the pushed tag with changelog content.
 
 1. Read the changelog entry for the current version from the config's `changelog-file`.
-2. Delegate to the `update-changelog` skill. Pass the formatted tag name as the version, the config's `changelog-file` path, and explicitly instruct it to **only update the GitHub release** — skip finding/inserting a changelog file entry (the `changelog` action already handled that earlier in this run). The skill should use `gh release edit` with the changelog entry content as release notes.
+2. Delegate to the `update-changelog` skill. Pass the bare resolved version (not the formatted tag name), the config's `changelog-file` path, and explicitly instruct it to **only update the GitHub release** — skip finding/inserting a changelog file entry (the `changelog` action already handled that earlier in this run). The skill should use `gh release edit` with the changelog entry content as release notes.
