@@ -1,6 +1,6 @@
 ---
 name: add-todo
-description: "Create or append tasks to TODO.md in the current working directory. Use when the user says 'add todo', 'add a task', 'TODO:', 'new task', 'track this', 'note this down', 'add to the backlog', 'before I forget', or any variation of wanting to capture new items. Also applies when the user finishes work and mentions follow-up items to save for later. Not appropriate for reading, viewing, checking off, removing, or reorganizing TODO.md."
+description: "Create or append tasks to TODO.md in the current working directory. Use when the user says 'add todo', 'add a task', 'TODO:', 'new task', 'track this', 'note this down', 'add to the backlog', 'before I forget', or any variation of wanting to capture new items. Not appropriate for reading, viewing, checking off, removing, or reorganizing TODO.md."
 disable-model-invocation: true
 ---
 
