@@ -11,6 +11,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `add-todo` | Append tasks to TODO.md | `/add-todo` |
 | `whats-next` | Prioritized list of incomplete TODO.md tasks | `/whats-next` |
 | `review-pr` | Review a pull request and provide feedback | `/review-pr` |
+| `simplify` | Simplify recently changed code within diff scope | `/simplify` |
 | `address-pr-comments` | Work through PR review comments one at a time | `/address-pr-comments` |
 | `update-pr-description` | Refresh a PR's title and description | `/update-pr-description` |
 | `update-docs` | Sync project docs with the current codebase | `/update-docs` |
