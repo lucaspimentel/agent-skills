@@ -69,8 +69,8 @@ acli jira workitem search --jql "..."
 |--------|---------------|---------|
 | `workitem` | search, create, create-bulk, edit, view, transition, assign, delete, archive, unarchive, clone, link, attachment, watcher, list-watchers | `acli jira workitem search --jql "project = TEAM"` |
 | `project` | list, view, create, update, delete, archive | `acli jira project list` |
-| `sprint` | create, update, view, delete, list-workitems | `acli jira sprint view 123` |
-| `board` | search, view (get is deprecated), create, delete, list-sprints, list-projects | `acli jira board list-sprints --board 42` |
+| `sprint` | create, update, view, delete, list-workitems | `acli jira sprint view --id 123` |
+| `board` | search, view (get is deprecated), create, delete, list-sprints, list-projects | `acli jira board list-sprints --id 42` |
 | `workitem comment` | create, list, update, delete | `acli jira workitem comment create --key KEY-1 --body "text"` |
 
 ### Confluence Entities
@@ -143,8 +143,11 @@ acli jira workitem create --generate-json
 # Create from JSON file
 acli jira workitem create --from-json workitem.json
 
-# Bulk create multiple issues
-acli jira workitem create-bulk
+# Bulk create multiple issues from a JSON array (--from-csv issues.csv also works)
+acli jira workitem create-bulk --from-json issues.json
+
+# Print the JSON array shape expected by create-bulk
+acli jira workitem create-bulk --generate-json
 
 # Use file for description
 acli jira workitem create --summary "Bug title" --project API --type Bug --from-file description.txt
@@ -250,17 +253,13 @@ acli jira workitem assign --jql "project = MOBILE AND status = Done" --assignee 
 # 1. Check auth
 acli auth status
 
-# 2. Generate template
-acli jira workitem create --generate-json > template.json
+# 2. Generate a bulk template (a JSON array of issues)
+acli jira workitem create-bulk --generate-json > issues.json
 
-# 3. Edit template.json with your data
+# 3. Edit issues.json with one array entry per issue
 
-# 4. Create from template (repeat for each)
-acli jira workitem create --from-json issue1.json
-acli jira workitem create --from-json issue2.json
-
-# OR use create-bulk
-acli jira workitem create-bulk
+# 4. Create all issues in one call
+acli jira workitem create-bulk --from-json issues.json
 ```
 
 ## Getting Help
