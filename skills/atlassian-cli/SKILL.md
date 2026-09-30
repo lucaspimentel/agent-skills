@@ -67,10 +67,10 @@ acli jira workitem search --jql "..."
 
 | Entity | Common Actions | Example |
 |--------|---------------|---------|
-| `workitem` | search, create, create-bulk, edit, view, transition, assign, delete | `acli jira workitem search --jql "project = TEAM"` |
+| `workitem` | search, create, create-bulk, edit, view, transition, assign, delete, archive, unarchive, clone, link, attachment, watcher, list-watchers | `acli jira workitem search --jql "project = TEAM"` |
 | `project` | list, view, create, update, delete, archive | `acli jira project list` |
 | `sprint` | create, update, view, delete, list-workitems | `acli jira sprint view 123` |
-| `board` | search, get, create, delete, list-sprints | `acli jira board list-sprints --board 42` |
+| `board` | search, view (get is deprecated), create, delete, list-sprints, list-projects | `acli jira board list-sprints --board 42` |
 | `workitem comment` | create, list, update, delete | `acli jira workitem comment create --key KEY-1 --comment "text"` |
 
 ### Confluence Entities
@@ -78,6 +78,8 @@ acli jira workitem search --jql "..."
 | Entity | Actions | Example |
 |--------|---------|---------|
 | `space` | list, view, create, update, archive, restore | `acli confluence space list` |
+| `page` | view | `acli confluence page view 12345` |
+| `blog` | list, view, create | `acli confluence blog list --space TEAM` |
 
 ## Batch Operations
 
