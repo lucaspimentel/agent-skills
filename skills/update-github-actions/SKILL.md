@@ -9,11 +9,13 @@ Update GitHub Actions in workflow files to their latest versions, pinned by comm
 
 ## Step 1 — Find workflow files
 
-Glob for `.github/workflows/*.yml` and `.github/workflows/*.yaml`. Read each file. If none are found, inform the user and stop.
+Glob for `.github/workflows/*.yml` and `.github/workflows/*.yaml`, plus local composite actions at `.github/actions/*/action.yml` and `.github/actions/*/action.yaml`. Read each file. If none are found, inform the user and stop.
+
+Treat composite action files exactly like workflow files in the steps below: scan their `uses:` lines, apply the same ignore rules, and include them in the Step 4 table.
 
 ## Step 2 — Extract action references
 
-For each workflow file, find all `uses:` lines that reference actions in `owner/repo@ref` format. Ignore:
+For each workflow or composite action file, find all `uses:` lines that reference actions in `owner/repo@ref` format. Ignore:
 - Local actions (paths starting with `./`)
 - Docker actions (paths starting with `docker://`)
 - Reusable workflow references (paths containing `.github/workflows/`)
@@ -39,16 +41,16 @@ For each unique action, determine the latest version tag within the same major v
 
 ### 3a — Find the latest tag for the current major version
 
-Extract the major version from the current ref (e.g. `@v4` → major `4`, `@v3.2.1` → major `3`). Then find the latest release whose tag matches the same major version:
+Extract the major version from the current ref (e.g. `@v4` → major `4`, `@v3.2.1` → major `3`). Then find the highest non-prerelease, non-draft release whose tag matches the same major version, sorted by version number:
 
 ```bash
-gh api repos/{owner}/{repo}/releases --jq '[.[] | select(.tag_name | test("^v{major}([.]|$)"))][0].tag_name'
+gh api --paginate --slurp repos/{owner}/{repo}/releases | jq -r --arg m "v{major}" '[.[][] | select((.prerelease or .draft) | not) | .tag_name | select(test("^" + $m + "([.]|$)"))] | sort_by(ltrimstr("v") | split(".") | map(tonumber? // 0)) | last // empty'
 ```
 
-If no matching release exists, fall back to listing tags:
+If no matching release exists, fall back to listing tags, sorted the same way:
 
 ```bash
-gh api repos/{owner}/{repo}/tags --jq '[.[] | select(.name | test("^v{major}([.]|$)"))][0].name'
+gh api --paginate --slurp repos/{owner}/{repo}/tags | jq -r --arg m "v{major}" '[.[][] | .name | select(test("^" + $m + "([.]|$)"))] | sort_by(ltrimstr("v") | split(".") | map(tonumber? // 0)) | last // empty'
 ```
 
 If both return empty, skip the action and report "no matching releases found" in the results table.
