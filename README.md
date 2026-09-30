@@ -1,6 +1,6 @@
 # agent-skills
 
-Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en/skills) and [pi](https://github.com/badlogic/pi-mono). Every skill lives once, in `skills/<name>/SKILL.md`, in the [Agent Skills](https://agentskills.io) format that both agents consume. The repo doubles as a Claude Code plugin marketplace and a pi package, so each agent installs the same files natively.
+Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en/skills) and [pi](https://github.com/earendil-works/pi). Every skill lives once, in `skills/<name>/SKILL.md`, in the [Agent Skills](https://agentskills.io) format that both agents consume. The repo doubles as a Claude Code plugin marketplace and a pi package, so each agent installs the same files natively.
 
 ## Skills
 
