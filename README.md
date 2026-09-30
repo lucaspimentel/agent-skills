@@ -18,6 +18,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `update-github-actions` | Update and pin GitHub Actions to commit SHAs | `/update-github-actions` |
 | `atlassian-cli` | Atlassian CLI (acli) usage for Jira and Confluence | Model-invoked |
 | `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | Model-invoked |
+| `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
 
 Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit` and `atlassian-cli` are model-invoked from their trigger descriptions.
 
