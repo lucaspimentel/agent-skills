@@ -12,11 +12,11 @@ Do not include volatile metrics (test counts, coverage percentages, line counts)
 
 ## Step 1 — Orient
 
-Glob for `**/*.md` to find all doc files. Read each one.
+List git-tracked doc files with `git ls-files '*.md'` (this skips `node_modules`, vendored, and generated directories). Read each one.
 
 ## Step 2 — Verify
 
-For each doc file, spot-check its claims against the codebase using Glob and Grep — focus on things likely to have changed (skill lists, plugin names, file paths, commands). Skip claims that are obviously stable.
+For each doc file, spot-check its claims against the codebase by searching it (file search and grep) — focus on things likely to have changed (skill lists, plugin names, file paths, commands). Skip claims that are obviously stable.
 
 ## Step 3 — Apply fixes
 
