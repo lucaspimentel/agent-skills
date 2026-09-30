@@ -1,0 +1,9 @@
+{
+  "name": "agent-skills",
+  "version": "0.1.0",
+  "description": "Developer workflow skills shared between Claude Code and pi: commits, PR reviews and comments, docs, changelogs, releases, TODOs, Atlassian CLI",
+  "author": {
+    "name": "Lucas Pimentel"
+  },
+  "repository": "https://github.com/lucaspimentel/agent-skills"
+}

@@ -1,0 +1,18 @@
+{
+  "name": "lucaspimentel-agent-skills",
+  "owner": {
+    "name": "Lucas Pimentel"
+  },
+  "metadata": {
+    "description": "Skills shared between Claude Code and pi, by Lucas Pimentel",
+    "pluginRoot": "./"
+  },
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "source": "./",
+      "description": "Developer workflow skills shared between Claude Code and pi: commits, PR reviews and comments, docs, changelogs, releases, TODOs, Atlassian CLI",
+      "version": "0.1.0"
+    }
+  ]
+}
