@@ -71,7 +71,7 @@ acli jira workitem search --jql "..."
 | `project` | list, view, create, update, delete, archive | `acli jira project list` |
 | `sprint` | create, update, view, delete, list-workitems | `acli jira sprint view 123` |
 | `board` | search, view (get is deprecated), create, delete, list-sprints, list-projects | `acli jira board list-sprints --board 42` |
-| `workitem comment` | create, list, update, delete | `acli jira workitem comment create --key KEY-1 --comment "text"` |
+| `workitem comment` | create, list, update, delete | `acli jira workitem comment create --key KEY-1 --body "text"` |
 
 ### Confluence Entities
 
