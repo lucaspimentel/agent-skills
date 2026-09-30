@@ -27,7 +27,7 @@ Update the PR's title and description to accurately reflect the changes.
   - `docs/pull_request_template.md`
 - If no template, include:
   - Summary of changes (what and why)
-  - Testing performed
+  - Testing performed (do not include test counts such as "23 tests passed"; state that the suite passes instead)
   - Breaking changes or migration notes (if applicable)
 - Keep concise but complete
 - Use bullet points for clarity

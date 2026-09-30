@@ -81,7 +81,7 @@ If no changes were made, no summary is needed.
 - Use `gh api` to create a review with specific line comments
 - Endpoint: `repos/OWNER/REPO/pulls/PR_NUMBER/reviews`
 - Each comment must specify: `path`, `line` (or `start_line`/`end_line`), `body`
-- Include footer in review body: `"\n\n---\n*Review by Claude Code*"`
+- Include footer in review body: `"\n\n---\n*Review by an AI agent*"`
 - ALWAYS use event type: `COMMENT`
 - NEVER use `REQUEST_CHANGES` or `APPROVE` — human review required
 - Group related comments under a single review
