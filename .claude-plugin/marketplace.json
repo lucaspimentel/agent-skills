@@ -11,7 +11,7 @@
     {
       "name": "agent-skills",
       "source": "./",
-      "description": "Developer workflow skills shared between Claude Code and pi: commits, PR reviews and comments, docs, changelogs, releases, TODOs, Atlassian CLI",
+      "description": "Developer workflow skills shared between Claude Code and pi: commits, PR reviews and comments, code simplification, docs, changelogs, releases, TODOs, design interviews, chezmoi dotfiles, Atlassian CLI, ZSA keyboard layouts",
       "version": "0.1.0"
     }
   ]

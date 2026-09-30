@@ -22,7 +22,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | Model-invoked |
 | `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
 
-Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit` and `atlassian-cli` are model-invoked from their trigger descriptions.
+Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `chezmoi-diff`, `atlassian-cli`, and `zsa-layouts` are model-invoked from their trigger descriptions.
 
 Claude-specific frontmatter (`argument-hint`, `context`, `agent`) is carried in the shared files; pi ignores unknown fields.
 
