@@ -38,10 +38,10 @@ Update the PR's title and description to accurately reflect the changes.
 ## Updating PR
 
 ### When editing an existing PR description
-1. Save the current PR description to a temp file: `gh pr view --json body --jq .body > "$(mktemp)"`
-2. Use the Edit tool to modify the temp file with the new description (this lets the user see the diff and approve before changes are applied)
-3. Once approved, apply: `gh pr edit PR_NUMBER --title "..." --body-file <temp-file>`
-4. Clean up the temp file
+1. Save the current PR description to a temp file and print its path: `tmp=$(mktemp) && gh pr view --json body --jq .body > "$tmp" && echo "$tmp"`
+2. Use the Edit tool to modify the temp file at the echoed path with the new description (this lets the user see the diff and approve before changes are applied)
+3. Once approved, apply: `gh pr edit PR_NUMBER --title "..." --body-file <echoed-path>`
+4. Clean up the temp file at the echoed path
 
 ### When creating a new PR or the existing description is empty
 1. Write the description directly using `gh pr edit PR_NUMBER --title "..." --body "..."`
