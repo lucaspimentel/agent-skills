@@ -97,13 +97,15 @@ If no action keywords are found, **auto-detect** actions based on repo state (on
 4. **Auto-add watch** — if both `tag` and `push` are detected (either explicitly or via auto-detect), also add `watch` (pushing a tag typically triggers CI workflows).
 5. **Auto-add release** — if both `changelog` and `watch` are in the action set (from explicit request or implicit rules), also add `release` (CI typically creates a GitHub release from the tag, and we should update it with changelog content).
 
+Apply the implicit rules below to the action set, whether its actions were requested explicitly or auto-detected, before the set is shown or executed. Implicitly added actions then appear pre-selected in the checklist.
+
+**Implicit changelog**: If `version` is requested but `changelog` is not explicitly listed, add `changelog` automatically, since version bumps should be logged. Only add if `changelog` is in the config's `actions` list.
+
+**Implicit commit**: If any action that modifies files is requested (`version`, `changelog`, `docs`) but `commit` is not explicitly listed, add `commit` automatically, since those file changes need to be committed. Only add if `commit` is in the config's `actions` list.
+
 Present the detected actions as a **multi-select checklist** so the user can toggle individual actions on or off. **Pre-select all detected actions.**
 
 If no actions are detected, tell the user everything is up to date and stop.
-
-**Implicit changelog**: If `version` is requested but `changelog` is not explicitly listed, add `changelog` automatically — version bumps should be logged. Only add if `changelog` is in the config's `actions` list.
-
-**Implicit commit**: If any action that modifies files is requested (`version`, `changelog`, `docs`) but `commit` is not explicitly listed, add `commit` automatically — those file changes need to be committed. Only add if `commit` is in the config's `actions` list.
 
 Reorder the requested actions into **canonical order**: version → changelog → docs → commit → tag → push → watch → release. Always execute in this order regardless of argument order.
 
