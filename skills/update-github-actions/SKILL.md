@@ -17,9 +17,21 @@ For each workflow file, find all `uses:` lines that reference actions in `owner/
 - Local actions (paths starting with `./`)
 - Docker actions (paths starting with `docker://`)
 - Reusable workflow references (paths containing `.github/workflows/`)
-- Actions already pinned to a full 40-character SHA
 
 Build a deduplicated list of actions with their current refs (e.g. `actions/checkout@v4`).
+
+### Actions already pinned to a SHA
+
+Actions pinned to a full 40-character SHA are still checked for updates. Determine their current version:
+
+1. If the line has a trailing version comment (`uses: owner/repo@<sha> # vX.Y.Z`), treat `vX.Y.Z` as the current version. Its major version drives Step 3a.
+2. If there is no version comment, resolve the SHA to a tag:
+
+   ```bash
+   gh api --paginate --slurp repos/{owner}/{repo}/tags | jq -r --arg sha "<sha>" '[.[][] | select(.commit.sha == $sha) | .name] | first // empty'
+   ```
+
+   Use the returned tag as the current version. If it returns nothing, skip the action and report "pinned SHA, version unknown" in the results table.
 
 ## Step 3 — Resolve latest versions and commit SHAs
 
@@ -57,7 +69,7 @@ gh api repos/{owner}/{repo}/git/tags/{sha} --jq '.object.sha'
 
 ## Step 4 — Present proposed changes
 
-Show the user a table of proposed updates before applying anything. Exclude actions that are already at the latest version/SHA.
+Show the user a table of proposed updates before applying anything. Exclude an action only when its current pinned SHA equals the newly resolved SHA (for tag refs like `@v4`, always propose pinning).
 
 | Workflow file | Action | Current ref | New pinned ref |
 |---|---|---|---|
