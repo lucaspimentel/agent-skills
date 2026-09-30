@@ -28,7 +28,8 @@ When the source and destination diverge, the user needs to decide which version 
 - **Destination → Source** (`chezmoi add`): Copy local file changes back into chezmoi source
 
 The source directory uses special filename prefixes (`dot_`, `executable_`, `symlink_`, etc.)
-and suffixes (`.tmpl` for templates).
+and suffixes (`.tmpl` for templates). For the full prefix/suffix table, ordering rules and
+source-to-destination examples, see [reference.md](reference.md).
 
 ## Workflow
 
@@ -144,5 +145,6 @@ confirmation prompt before pushing to remote.
 
 ## Reference Documentation
 
+- [reference.md](reference.md): chezmoi source file naming conventions (prefixes, suffixes, ordering, examples)
 - [Command Overview](https://www.chezmoi.io/user-guide/command-overview/)
 - [Reference](https://www.chezmoi.io/reference/)
