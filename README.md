@@ -7,6 +7,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | Skill | Purpose | Invocation |
 |---|---|---|
 | `git-commit` | Commit pending changes, optionally pushing | Model-invoked |
+| `chezmoi-diff` | Resolve differences between chezmoi source and local dotfiles | Model-invoked |
 | `ship` | Release automation: version, changelog, docs, commit, tag, push, watch, release | `/ship` |
 | `add-todo` | Append tasks to TODO.md | `/add-todo` |
 | `whats-next` | Prioritized list of incomplete TODO.md tasks | `/whats-next` |
