@@ -172,7 +172,7 @@ Delegate to the `git-commit` skill.
 2. List recent workflow runs: `gh run list --limit 5 --json databaseId,name,status,event,createdAt`. If `gh` fails with an auth error, report the issue and skip the watch action.
 3. Filter for runs that started within the last 60 seconds (compare `createdAt` to the current time).
 4. If no runs found, run `sleep 5` and retry once. If still no runs, report "No CI workflows were triggered" and stop.
-5. For each run, call `gh run watch --exit-status <id>` using the Bash tool's `timeout` parameter set to `600000` (10 minutes) to stream progress until completion. The `--exit-status` flag returns a non-zero exit code on failure, making pass/fail detection reliable.
+5. For each run, call `gh run watch --exit-status <id>` with a 10-minute timeout on the shell tool call, converted to the agent's units (600000 milliseconds in Claude Code, 600 seconds in pi), to stream progress until completion. The `--exit-status` flag returns a non-zero exit code on failure, making pass/fail detection reliable.
 6. Report final status (pass/fail) for each workflow.
 
 ### release
