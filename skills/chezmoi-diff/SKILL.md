@@ -1,5 +1,6 @@
 ---
 name: chezmoi-diff
+disable-model-invocation: true
 allowed-tools: Bash(chezmoi status *) Bash(chezmoi diff *) Bash(chezmoi cat *) Bash(chezmoi source-path *) Bash(chezmoi target-path *) Bash(git status *) Bash(git add *) Bash(git commit *) Bash(git diff *) Bash(git log *)
 description: >
   Help resolve differences between chezmoi-managed dotfiles and local files.

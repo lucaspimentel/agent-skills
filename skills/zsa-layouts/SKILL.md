@@ -1,5 +1,6 @@
 ---
 name: zsa-layouts
+disable-model-invocation: true
 description: Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx. Use when given a configure.zsa.io layout URL or hash, when the user mentions a Voyager/Moonlander/ErgoDox layout, or asks to fetch, display, compare revisions of, or get feedback on a ZSA keyboard layout.
 ---
 
