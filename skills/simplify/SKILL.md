@@ -1,54 +1,89 @@
 ---
 name: simplify
-description: "Review recently changed code for simplification and apply clarity improvements. Use when the user says 'simplify', 'simplify my changes', 'clean up my diff', 'review what I just changed', 'simplify the last commit', 'tidy up the changed lines', or any variation of wanting the current diff simplified for clarity, consistency, and maintainability. Supports '--staged' to review the index, '--ref=<ref>' to diff against a specific ref, and an optional file list to narrow scope."
-argument-hint: "[--staged] [--ref=<ref>] [file...]"
+description: "Review recently changed code for simplification and apply clarity improvements. Use when the user says 'simplify', 'simplify my changes', 'simplify this PR', 'clean up my diff', 'review what I just changed', 'simplify the last commit', 'simplify pending changes', 'tidy up the changed lines', or any variation of wanting changed code simplified for clarity, consistency, and maintainability. With no argument, reviews the current branch's open PR (or the branch vs the default branch). Accepts 'pending changes', 'last commit', or a free-form description of what to review (paths, commits, ranges)."
+argument-hint: "[pending changes | last commit | <anything>]"
 disable-model-invocation: true
 ---
 
-Review recently changed files and apply simplification improvements.
+Review recently changed code and apply simplification improvements.
 
-## Step 1 — Determine the diff target
+When this skill says "ask", use the `ask_user_question` / `AskUserQuestion` tool if available. If no question tool is available or the session is non-interactive, follow the **Non-interactive** rules at each point where a question would be asked.
 
-Parse the user's arguments:
+## Step 1 — Parse the argument
 
-- `--staged` present → diff the index (add `--cached` to git commands)
-- `--ref=<ref>` present → diff against that ref
-- otherwise → diff against `HEAD`
+Normalize the argument: trim, lowercase, and ignore fillers such as "the" and "my". Then match the **whole** argument:
 
-## Step 2 — List changed files
+- empty → **default** target (step 2)
+- `pending changes` → **pending** target
+- `last commit` → **last-commit** target
+- anything else → **free-form** (step 3)
 
-Run:
+Partial matches are free-form: `last commit in src/auth` is not the `last commit` phrase.
 
-```
-git diff --name-status [--cached | <target-ref>]
-```
+## Step 2 — Resolve the target
+
+Every target resolves to a **base** and an **end**:
+
+| Target | Base | End | Untracked files |
+|---|---|---|---|
+| default | merge-base (below) | working tree | included as added |
+| pending | `HEAD` | working tree | included as added |
+| last-commit | `HEAD~1` (first parent for merges; the empty tree `4b825dc642cb6eb9a060e54bf8d69288fbee4904` if `HEAD` is a root commit) | `HEAD` | excluded |
+
+### Default target: find the merge-base
+
+1. Confirm a git repo (`git rev-parse --show-toplevel`) and a checked-out branch (`git symbolic-ref -q HEAD`). If either fails, stop and tell the user. Never fall back to `HEAD`.
+2. **PR:** run `gh pr view --json state,baseRefName,baseRefOid`.
+   - If `state` is `OPEN` (drafts included): make sure `baseRefOid` exists locally (`git cat-file -e <baseRefOid>^{commit}`). If missing, `git fetch` the base branch from the remote for the PR's base repository (`upstream` in a fork checkout, otherwise `origin`). Base = `git merge-base HEAD <baseRefOid>`.
+   - If the branch has no PR, or the PR is `MERGED` or `CLOSED`: continue to the next step.
+   - If `gh` itself fails (not installed, not authenticated, network error), or the base commit still can't be found after fetching: continue to the next step and tell the user that PR detection failed and the default branch is being used instead.
+3. **Default branch:** resolve with `git symbolic-ref --short refs/remotes/origin/HEAD`; if unset, `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name` (as `origin/<name>`). Base = `git merge-base HEAD <default-branch-ref>`.
+4. If no base can be resolved, stop and tell the user what failed.
+
+On the default branch with no PR, the merge-base is the remote default branch, so the target is unpushed commits plus working-tree changes.
+
+## Step 3 — Free-form arguments
+
+Interpret the argument and turn it into one of:
+
+- **Diff target:** a base and end (as in step 2), optionally filtered to paths. Use this whenever the argument has diff context, such as a commit, range, branch, or time ("last commit in src/auth", "commits since yesterday", "abc123..HEAD"). Scope is the target's changed lines, filtered to the paths.
+- **Whole-file target:** the argument names only paths, directories, or globs with no diff context ("src/foo.ts", "src/auth", "**/*.cs"). Expand directories and globs to tracked and untracked (non-ignored) files. Every line of every matched file is in scope.
+
+Rules:
+
+- If the reading is clear, proceed without asking. Mention the resolved target in the scope list.
+- If the argument plausibly maps to more than one target, ask which one before continuing. **Non-interactive:** stop and list the possible readings.
+- If a whole-file target matches more than 10 files, ask before continuing. **Non-interactive:** stop and list the matches.
+- If a named path does not exist, stop and tell the user.
+- If the argument can't be turned into a git diff or file set, stop and list the valid arguments: none, `pending changes`, `last commit`, or a description of paths or commits.
+
+## Step 4 — List changed files
+
+Skip this step and step 5 for whole-file targets: list each file as `- <path> (whole file in scope)` and go to step 6.
+
+Run, adding `-- <paths>` when the target is path-filtered:
+
+- end is the working tree: `git diff --name-status <base>`
+- end is a commit: `git diff --name-status <base> <end>`
 
 Parse each line: the first character is the status (`M` modified, `A` added, `R` renamed, `C` copied). For `R` and `C` entries (`R100\told\tnew`), use the second path (the new one).
 
-Unless `--staged` is set, also list untracked files, which `git diff` never reports:
+When untracked files are included (see step 2), also run `git ls-files --others --exclude-standard [-- <paths>]` and add each file with status `A` (added), so the entire file is in scope.
 
-```
-git ls-files --others --exclude-standard
-```
+If the list is empty, tell the user there are no changes to simplify for the resolved target and stop.
 
-Add each untracked file with status `A` (added), so the entire file is in scope.
-
-- If the user passed an explicit file list, use only those files, treated as modified against the target ref. A listed file that is untracked is treated as added.
-- If both the diff list and the untracked list are empty and the target is `HEAD`, fall back to `git diff --name-status HEAD~1` and use `HEAD~1` as the target ref for step 3.
-- If still empty, tell the user there are no changes to simplify and stop.
-
-## Step 3 — Compute changed line ranges
+## Step 5 — Compute changed line ranges
 
 For each non-added file, run:
 
-```
-git diff -U0 --no-ext-diff [--cached | <target-ref>] -- <path>
-```
+- end is the working tree: `git diff -U0 --no-ext-diff <base> -- <path>`
+- end is a commit: `git diff -U0 --no-ext-diff <base> <end> -- <path>`
 
-Parse each hunk header `@@ -a,b +c,d @@`: the changed range in the current file starts at `c` and spans `d` lines (a bare `+c @@` means `d` is 1). Skip hunks where `d` is 0 (pure deletions). Merge ranges that touch or overlap (a range starting at or before the previous range's end + 1 becomes one range spanning both).
+Parse each hunk header `@@ -a,b +c,d @@`: the changed range in the end version starts at `c` and spans `d` lines (a bare `+c @@` means `d` is 1). Skip hunks where `d` is 0 (pure deletions). Merge ranges that touch or overlap (a range starting at or before the previous range's end + 1 becomes one range spanning both).
 
 - For added files (`A`), the entire file is in scope.
 - If the per-file diff fails, mark the file "changed lines unavailable — inspect git diff before editing".
+- When the end is a commit and the file also has uncommitted changes (`git diff --quiet HEAD -- <path>` fails), the line numbers no longer match the current file: mark it "changed lines unavailable — inspect git diff before editing".
 - If a file has no remaining ranges, mark it "deletions only — no current lines to simplify".
 
 Format each file for the scope list as one of:
@@ -58,9 +93,11 @@ Format each file for the scope list as one of:
 - `- <path> (<status>; deletions only — no current lines to simplify)`
 - `- <path> (<status>; changed lines: 12, 30-45)` — single lines bare, ranges as `start-end`, comma-separated
 
-## Step 4 — Run the review
+Start the scope list with one line naming the resolved target, e.g. `Target: PR #123 (working tree vs merge-base abc1234 with main)`.
 
-With the scope list from step 3 substituted below, follow this prompt exactly:
+## Step 6 — Run the review
+
+With the scope list substituted below, follow this prompt exactly:
 
 Review the following recently changed files and apply simplification improvements.
 
@@ -73,20 +110,18 @@ Review the following recently changed files and apply simplification improvement
 
 ## Scope
 
-Only review and modify the changed lines listed below. Changed line numbers refer to
-the current file contents. You may read surrounding code for context, but must not
-edit it. For added files, the entire file is considered changed.
+<scope list from step 4 or 5>
 
-<scope list from step 3>
+Changed line numbers refer to the current file contents. Lines listed above are **in scope**; everything else is **out of scope**. You may read out-of-scope code for context. For added files and whole-file targets, every line is in scope.
+
+An out-of-scope finding is **related** only if it is tied to the in-scope changes: code the changes made dead or redundant, comments the changes made stale, or code whose simplification would directly simplify the changed lines. Never act on or suggest unrelated out-of-scope improvements, however worthwhile.
 
 ## Process
 
-1. Read each file listed above and inspect its changed lines
-2. Identify concrete improvements within those lines (dead code, unclear names, redundant logic, inconsistent patterns)
-3. Apply changes one file at a time, keeping every edit within the listed line ranges
-4. After all changes, run existing tests to verify nothing is broken
-5. Summarize what you changed and why
+1. **Scoped pass.** Read each file and apply concrete improvements within the in-scope lines (dead code, unclear names, redundant logic, inconsistent patterns), one file at a time.
+2. **Auto tier.** Apply related out-of-scope edits that only remove dead code or redundant/stale comments. Do not apply any other out-of-scope edit in this step.
+3. Run the existing tests.
+4. **Confirmed batch.** Collect the remaining related out-of-scope findings (renames, restructuring, consolidation, anything beyond dead code and comments). If there are any, list them with file and line references and ask once which to apply. Apply only the approved ones, then run the tests again. Skip this step if there are no findings or every line is in scope. **Non-interactive:** do not apply them; list them in the summary as suggestions.
+5. **Summarize** what changed and why, grouped by stage: scoped pass, auto tier (list every auto-applied out-of-scope edit explicitly), and confirmed batch. Report test results for each run.
 
-Do NOT add new features, change public APIs, or refactor code outside the listed
-line ranges. If a worthwhile simplification would require editing unchanged code,
-leave it alone and mention it in the summary instead.
+Do NOT add new features or change public APIs.
