@@ -10,6 +10,8 @@ Interview the user relentlessly about the design under discussion until there ar
 
 Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you have not heard yet. Ask the whole frontier in one round, then wait for the user's answers before the next round.
 
+A question belongs to the frontier only if no question still open this round could change it. That covers relevance as well as content: if a plausible answer to an open question would make this one moot or materially change its options, it waits for a later round. When unsure, defer: asking a round late costs a round trip, asking after its premise collapsed wastes the user's attention.
+
 ## How to ask
 
 If the `ask_user_question` / `AskUserQuestion` tool is available, ask every round through it:
@@ -33,7 +35,7 @@ Only when the tool is unavailable (non-interactive session, tool refused), fall 
 ➡️ <your recommended answer>
 ```
 
-Each round of answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
+Each round of answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round.
 
 Before the first round, read the design material the user pointed at (docs, issues, code, prior discussion) and fold what you learn into the tree as either settled facts or questions.
 
