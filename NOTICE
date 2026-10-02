@@ -52,6 +52,18 @@ https://github.com/mattpocock/skills (file:
 MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
 `skills/writing-for-agents/LICENSE`.
 
+## atlassian-cli
+
+`skills/atlassian-cli/` is based on the acli skill from
+https://github.com/leweii/atlassian-cli (file: `SKILL.md`), first vendored via
+the lucaspimentel/claude-plugins marketplace (commit 38c9cba, 2026-04-23),
+which converted the upstream Graphviz dot diagrams to mermaid flowcharts. The
+command surface was refreshed for acli 1.3.39 on 2026-09-30 and again on
+2026-10-02, with MCP comparison guidance added.
+
+MIT License, Copyright (c) 2026 Jakob He. The full license text is in
+`skills/atlassian-cli/LICENSE`.
+
 ## Convention
 
 Future skills derived from third-party material get:

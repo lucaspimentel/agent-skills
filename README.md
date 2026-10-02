@@ -26,7 +26,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `session-handoff` | Compact the current conversation into a handoff document | `/session-handoff` |
 | `writing-for-agents` | Reference for writing skills and AGENTS.md-style docs agents consume | Model-invoked |
 
-`grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed; see `NOTICE` and the `LICENSE` file in each skill directory.
+`grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed. `atlassian-cli` is derived from [leweii/atlassian-cli](https://github.com/leweii/atlassian-cli), MIT licensed. See `NOTICE` and the `LICENSE` file in each skill directory.
 
 Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `atlassian-cli`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions.
 

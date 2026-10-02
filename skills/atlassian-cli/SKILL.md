@@ -3,6 +3,8 @@ name: atlassian-cli
 description: Use when working with Jira or Confluence from command line, including authentication, searching issues with JQL, bulk operations, sprint reports, or creating/updating work items using acli
 ---
 
+<!-- Based on the acli skill from https://github.com/leweii/atlassian-cli, MIT licensed. -->
+
 # Atlassian CLI (acli)
 
 ## Overview
