@@ -11,6 +11,8 @@ description: Use when working with Jira or Confluence from command line, includi
 
 The Atlassian CLI (`acli`) provides command-line access to Jira, Confluence, and other Atlassian products. **Core principle:** Always check authentication first, use correct command structure, and leverage batch operations.
 
+This reference was verified against **acli 1.3.39-stable** (October 2026). If `acli --version` reports a newer release, do not assume this reference is complete: check `acli <product> --help` for the current command surface, and the upstream repo (https://github.com/leweii/atlassian-cli) or https://developer.atlassian.com/cloud/acli/ for release notes on new features.
+
 ## When to Use
 
 - Creating, searching, or updating Jira issues
@@ -82,20 +84,23 @@ acli jira workitem search --jql "..."
 ## Quick Reference
 
 ### Common Products
-- `auth` - Authentication management
+- `auth` - Authentication management (multiple accounts, OAuth)
 - `jira` - Jira Cloud commands
 - `confluence` - Confluence Cloud commands
 - `admin` - Admin operations
+- `guard` - Atlassian Guard CLI
+- `rovodev` - Rovo Dev, Atlassian's AI coding agent (Beta)
+- `config` - Configuration settings
 
 ### Jira Entities & Actions
 
 | Entity | Common Actions | Example |
 |--------|---------------|---------|
 | `workitem` | search, create, create-bulk, edit, view, transition, assign, delete, archive, unarchive, clone, link, attachment, watcher, list-watchers | `acli jira workitem search --jql "project = TEAM"` |
-| `project` | list, view, create, update, delete, archive | `acli jira project list` |
+| `project` | list, view, create, update, delete, archive, restore | `acli jira project list` |
 | `sprint` | create, update, view, delete, list-workitems | `acli jira sprint view --id 123` |
 | `board` | search, view (get is deprecated), create, delete, list-sprints, list-projects | `acli jira board list-sprints --id 42` |
-| `workitem comment` | create, list, update, delete | `acli jira workitem comment create --key KEY-1 --body "text"` |
+| `workitem comment` | create, list, update, delete, visibility | `acli jira workitem comment create --key KEY-1 --body "text"` |
 
 ### Confluence Entities
 
