@@ -54,5 +54,9 @@ MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
 
 ## Convention
 
-Future skills derived from third-party material get a per-skill LICENSE file
-containing the upstream license text, plus an entry in this file.
+Future skills derived from third-party material get:
+
+- a per-skill LICENSE file containing the upstream license text verbatim,
+- an entry in this file,
+- a row in the README skills table,
+- a provenance HTML comment near the top of the skill's SKILL.md.

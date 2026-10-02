@@ -26,7 +26,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `session-handoff` | Compact the current conversation into a handoff document | `/session-handoff` |
 | `writing-for-agents` | Reference for writing skills and AGENTS.md-style docs agents consume | Model-invoked |
 
-`grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are forked from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed; see `NOTICE` and the `LICENSE` file in each skill directory.
+`grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed; see `NOTICE` and the `LICENSE` file in each skill directory.
 
 Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `atlassian-cli`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions.
 
@@ -68,4 +68,4 @@ agent-skills/
 
 ## Editing a skill
 
-Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next session (pi: `/reload`). Keep descriptions under 1024 characters and rich in trigger phrases even for slash-only skills: they drive command-menu discoverability and any future switch to model invocation.
+Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next session (pi: `/reload`). Keep descriptions under 1024 characters and rich in trigger phrases even for slash-only skills: they drive command-menu discoverability and any future switch to model invocation. Conventions for forking third-party skills and attribution live in [AGENTS.md](AGENTS.md).
