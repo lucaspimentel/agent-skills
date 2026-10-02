@@ -1,6 +1,6 @@
 ---
 name: atlassian
-description: Use when working with Jira, Confluence, or other Atlassian products via the Atlassian CLI (acli) or the Atlassian MCP server: authentication, searching with JQL/CQL, bulk operations, sprint reports, creating/updating work items and pages, cross-product relationship queries
+description: "Use when working with Jira, Confluence, or other Atlassian products via the Atlassian CLI (acli) or the Atlassian MCP server: authentication, searching with JQL/CQL, bulk operations, sprint reports, creating/updating work items and pages, cross-product relationship queries"
 ---
 
 <!-- Based on the acli skill from https://github.com/leweii/atlassian-cli, MIT licensed. -->
