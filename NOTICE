@@ -1,0 +1,17 @@
+# NOTICE
+
+This repository includes material derived from third-party sources, each under
+its own MIT license.
+
+## grill-me
+
+`skills/grill-me/` is based on the "grilling" skill from
+https://github.com/mattpocock/skills (file: `skills/productivity/grilling/SKILL.md`).
+
+MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
+`skills/grill-me/LICENSE`.
+
+## Convention
+
+Future skills derived from third-party material get a per-skill LICENSE file
+containing the upstream license text, plus an entry in this file.

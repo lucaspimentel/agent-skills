@@ -4,6 +4,8 @@ description: "A relentless interview about a design that continues until no ambi
 disable-model-invocation: true
 ---
 
+<!-- Based on "grilling" from https://github.com/mattpocock/skills, MIT licensed. -->
+
 Interview the user relentlessly about the design under discussion until there are no ambiguities left. Map the design as a **design tree**: every decision branches into the decisions that hang off it.
 
 ## Rounds
