@@ -18,7 +18,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `update-docs` | Sync project docs with the current codebase | `/update-docs` |
 | `update-changelog` | Maintain CHANGELOG.md and GitHub releases | `/update-changelog` |
 | `update-github-actions` | Update and pin GitHub Actions to commit SHAs | `/update-github-actions` |
-| `atlassian-cli` | Atlassian CLI (acli) usage for Jira and Confluence | Model-invoked |
+| `atlassian` | Atlassian work via the acli CLI or the Atlassian MCP server: Jira, Confluence, bulk ops, sprint reports | Model-invoked |
 | `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | `/zsa-layouts` |
 | `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
 | `tdd` | Test-driven red-green-refactor loop with test-quality rules | Model-invoked |
@@ -26,9 +26,9 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `session-handoff` | Compact the current conversation into a handoff document | `/session-handoff` |
 | `writing-for-agents` | Reference for writing skills and AGENTS.md-style docs agents consume | Model-invoked |
 
-`grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed. `atlassian-cli` is derived from [leweii/atlassian-cli](https://github.com/leweii/atlassian-cli), MIT licensed. See `NOTICE` and the `LICENSE` file in each skill directory.
+`grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed. `atlassian` is derived from [leweii/atlassian-cli](https://github.com/leweii/atlassian-cli), MIT licensed. See `NOTICE` and the `LICENSE` file in each skill directory.
 
-Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `atlassian-cli`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions.
+Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `atlassian`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions.
 
 Claude-specific frontmatter (`argument-hint`, `context`, `agent`) is carried in the shared files; pi ignores unknown fields.
 
