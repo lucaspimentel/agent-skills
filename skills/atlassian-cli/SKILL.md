@@ -24,6 +24,28 @@ The Atlassian CLI (`acli`) provides command-line access to Jira, Confluence, and
 - When web UI is more appropriate (one-off visual tasks)
 - When API tokens/integrations are already available
 
+## acli vs Atlassian MCP
+
+Atlassian also ships a hosted remote MCP server (Rovo MCP v2, `https://mcp.atlassian.com/v2/mcp`). When an Atlassian MCP connection is available in your environment (pi, Claude Code), split work between the two:
+
+**Prefer the MCP server when:**
+- Single-issue reads and writes (Jira get/search/create/edit/transition/comment, Confluence get/create/update/search are first-class tools with richer, self-describing responses)
+- Semantic search across Jira/Confluence (Rovo `search`)
+- Cross-product relationship queries (Teamwork Graph: `getGraphContext`/`getGraphObject`)
+- Work in products acli does not cover: Compass, Bitbucket, Teams, Goals, Focus (via `discover` + `executeRead`/`executeWrite`/`executeDestructive`, ~315 operations)
+- Destructive operations should be separately permission-gated (MCP exposes them as a dedicated `executeDestructive` tool)
+
+**Prefer acli when:**
+- Bulk operations: `create-bulk`, or `edit`/`transition`/`assign` with `--jql`/`--filter`/`--key` plus `--yes`. The MCP server has no batching primitive; an agent would have to loop one call per issue
+- Reports and data export: `--csv`, `--fields`, `--count`, `--paginate`
+- Sprint, board, worklog, release, and field-history questions: these need purpose-built endpoints, not JQL; acli has first-class `sprint`/`board` entities
+- Saved-filter targeting (`--filter <id>`)
+- No MCP connection is configured
+
+Both cover the core loop (read, JQL/CQL search, create, edit, transition, comment) with rough parity; either is fine there.
+
+**MCP version note:** v2 (GA 2026-09-08) exposes a curated 21-tool list plus the `discover`/`execute` family; it renamed several v1 tools (`getConfluencePage` became `getConfluenceContent`, `addCommentToJiraIssue` became `addOrEditJiraIssueComment`) and removed most v1-era granular tools behind `discover`/`execute`. A cached v1 tool list (about 40 tools) is stale: probe the server with `tools/list` instead of trusting caches.
+
 ## Authentication - FIRST STEP ALWAYS
 
 ```mermaid
