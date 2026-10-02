@@ -4,7 +4,7 @@ Atlassian CLI (`acli`) usage for Jira and Confluence: authentication, JQL search
 
 Authored by [Jakob He](https://github.com/leweii), repackaged from [leweii/atlassian-cli](https://github.com/leweii/atlassian-cli) under the MIT License. The skill has been locally updated beyond upstream v1.0.0 with command-surface additions (the `board get` deprecation note, additional `workitem` actions, and Confluence `page`/`blog` entities); re-check upstream before treating any copy differences as unintentional drift.
 
-See [installation instructions](../../README.md#installation).
+See [installation instructions](../../README.md#install).
 
 ## Prerequisites
 

@@ -7,7 +7,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | Skill | Purpose | Invocation |
 |---|---|---|
 | `git-commit` | Commit pending changes, optionally pushing | Model-invoked |
-| `chezmoi-diff` | Resolve differences between chezmoi source and local dotfiles | Model-invoked |
+| `chezmoi-diff` | Resolve differences between chezmoi source and local dotfiles | `/chezmoi-diff` |
 | `ship` | Release automation: version, changelog, docs, commit, tag, push, watch, release | `/ship` |
 | `add-todo` | Append tasks to TODO.md | `/add-todo` |
 | `whats-next` | Prioritized list of incomplete TODO.md tasks | `/whats-next` |
@@ -19,16 +19,16 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `update-changelog` | Maintain CHANGELOG.md and GitHub releases | `/update-changelog` |
 | `update-github-actions` | Update and pin GitHub Actions to commit SHAs | `/update-github-actions` |
 | `atlassian-cli` | Atlassian CLI (acli) usage for Jira and Confluence | Model-invoked |
-| `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | Model-invoked |
+| `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | `/zsa-layouts` |
 | `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
 | `tdd` | Test-driven red-green-refactor loop with test-quality rules | Model-invoked |
 | `diagnosing-bugs` | Diagnosis loop for hard bugs: build and tighten a feedback loop | Model-invoked |
 | `session-handoff` | Compact the current conversation into a handoff document | `/session-handoff` |
 | `writing-for-agents` | Reference for writing skills and AGENTS.md-style docs agents consume | Model-invoked |
 
-`grill-me` is based on the "grilling" skill from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed (see `skills/grill-me/LICENSE` and `NOTICE`).
+`grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are forked from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed; see `NOTICE` and the `LICENSE` file in each skill directory.
 
-Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `chezmoi-diff`, `atlassian-cli`, and `zsa-layouts` are model-invoked from their trigger descriptions.
+Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `atlassian-cli`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions.
 
 Claude-specific frontmatter (`argument-hint`, `context`, `agent`) is carried in the shared files; pi ignores unknown fields.
 
@@ -40,7 +40,7 @@ Register the repo as a plugin marketplace, then install the plugin:
 
 ```
 /plugin marketplace add lucaspimentel/agent-skills
-/plugin install agent-skills@lucaspimentel-agent-skills
+/plugin install agent-skills@lucasp-agent-skills
 ```
 
 ### pi
@@ -58,10 +58,12 @@ agent-skills/
 │   └── plugin.json          # plugin: skills/ at repo root
 ├── package.json             # pi package manifest: pi.skills = ["./skills"]
 ├── LICENSE
+├── NOTICE                   # attribution for third-party-derived skills
 ├── README.md
 └── skills/
     └── <name>/
-        └── SKILL.md
+        ├── SKILL.md         # + optional supporting files (reference docs, scripts)
+        └── LICENSE          # only for third-party-derived skills
 ```
 
 ## Editing a skill

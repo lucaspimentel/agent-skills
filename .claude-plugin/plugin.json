@@ -1,7 +1,7 @@
 {
   "name": "agent-skills",
   "version": "0.1.0",
-  "description": "Developer workflow skills shared between Claude Code and pi: commits, PR reviews and comments, code simplification, docs, changelogs, releases, TODOs, design interviews, chezmoi dotfiles, Atlassian CLI, ZSA keyboard layouts",
+  "description": "Developer workflow skills shared between Claude Code and pi: commits, PR reviews and comments, code simplification, docs, changelogs, releases, TODOs, design interviews, TDD, bug diagnosis, session handoff, agent-doc writing, chezmoi dotfiles, Atlassian CLI, ZSA keyboard layouts",
   "author": {
     "name": "Lucas Pimentel"
   },
