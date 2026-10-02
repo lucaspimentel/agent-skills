@@ -11,6 +11,47 @@ https://github.com/mattpocock/skills (file: `skills/productivity/grilling/SKILL.
 MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
 `skills/grill-me/LICENSE`.
 
+## tdd
+
+`skills/tdd/` is forked from the "tdd" skill in
+https://github.com/mattpocock/skills (file: `skills/engineering/tdd/SKILL.md`,
+with supporting files `tests.md` and `mocking.md`). The companion reference
+`skills/tdd/codebase-design.md` extracts the Glossary and "Deep vs shallow"
+sections from that repo's `skills/engineering/codebase-design/SKILL.md`.
+
+MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
+`skills/tdd/LICENSE`.
+
+## diagnosing-bugs
+
+`skills/diagnosing-bugs/` is forked from the "diagnosing-bugs" skill in
+https://github.com/mattpocock/skills (file:
+`skills/engineering/diagnosing-bugs/SKILL.md`, with
+`scripts/hitl-loop.template.sh`).
+
+MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
+`skills/diagnosing-bugs/LICENSE`.
+
+## session-handoff
+
+`skills/session-handoff/` is forked from the "handoff" skill in
+https://github.com/mattpocock/skills (file:
+`skills/productivity/handoff/SKILL.md`), renamed from "handoff" to
+"session-handoff".
+
+MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
+`skills/session-handoff/LICENSE`.
+
+## writing-for-agents
+
+`skills/writing-for-agents/` is forked from the "writing-for-agents" skill in
+https://github.com/mattpocock/skills (file:
+`skills/productivity/writing-for-agents/SKILL.md`, with
+`SKILL-MECHANICS.md`).
+
+MIT License, Copyright (c) 2026 Matt Pocock. The full license text is in
+`skills/writing-for-agents/LICENSE`.
+
 ## Convention
 
 Future skills derived from third-party material get a per-skill LICENSE file

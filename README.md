@@ -21,6 +21,10 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `atlassian-cli` | Atlassian CLI (acli) usage for Jira and Confluence | Model-invoked |
 | `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | Model-invoked |
 | `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
+| `tdd` | Test-driven red-green-refactor loop with test-quality rules | Model-invoked |
+| `diagnosing-bugs` | Diagnosis loop for hard bugs: build and tighten a feedback loop | Model-invoked |
+| `session-handoff` | Compact the current conversation into a handoff document | `/session-handoff` |
+| `writing-for-agents` | Reference for writing skills and AGENTS.md-style docs agents consume | Model-invoked |
 
 `grill-me` is based on the "grilling" skill from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed (see `skills/grill-me/LICENSE` and `NOTICE`).
 
