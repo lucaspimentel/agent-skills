@@ -53,6 +53,8 @@ pi install https://github.com/lucaspimentel/agent-skills
 
 ```
 agent-skills/
+├── .github/workflows/
+│   └── validate.yml         # CI: runs scripts/validate.sh
 ├── .claude-plugin/
 │   ├── marketplace.json     # Claude Code marketplace manifest
 │   └── plugin.json          # plugin: skills/ at repo root
@@ -60,6 +62,9 @@ agent-skills/
 ├── LICENSE
 ├── NOTICE                   # attribution for third-party-derived skills
 ├── README.md
+├── scripts/
+│   ├── validate.sh          # static checks for manifests and skills
+│   └── validate_skills.py   # skills-ref spec check with an allowlist
 └── skills/
     └── <name>/
         ├── SKILL.md         # + optional supporting files (reference docs, scripts)
@@ -69,3 +74,12 @@ agent-skills/
 ## Editing a skill
 
 Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next session (pi: `/reload`). Keep descriptions under 1024 characters and rich in trigger phrases even for slash-only skills: they drive command-menu discoverability and any future switch to model invocation. Conventions for forking third-party skills and attribution live in [AGENTS.md](AGENTS.md).
+
+## Validation
+
+`scripts/validate.sh` runs the static checks that CI runs on every push to `main` and every pull request. It needs `claude` and `uv`, and no credentials.
+
+- `claude plugin validate --strict` on the marketplace manifest, the plugin manifest, and `skills/`.
+- `scripts/validate_skills.py`, which applies the [Agent Skills spec](https://agentskills.io/specification) checks from [skills-ref](https://pypi.org/project/skills-ref/): frontmatter format, `name` rules (including matching the directory), `description` length, and unknown fields.
+
+The spec does not list `argument-hint`, `context`, `agent`, or `disable-model-invocation`, so `validate_skills.py` allows those four by name. The first three are Claude Code only; `disable-model-invocation` is honored by both Claude Code and pi. Any other field, including a misspelling of these, fails.
