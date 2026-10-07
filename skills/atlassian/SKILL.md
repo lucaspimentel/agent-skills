@@ -107,8 +107,14 @@ acli jira workitem search --jql "..."
 | Entity | Actions | Example |
 |--------|---------|---------|
 | `space` | list, view, create, update, archive, restore | `acli confluence space list` |
-| `page` | view | `acli confluence page view 12345` |
+| `page` | view | `acli confluence page view --id 12345` |
 | `blog` | list, view, create | `acli confluence blog list --space TEAM` |
+
+**Confluence `page view` caveats (verified against acli 1.3.39-stable):**
+- The page ID must be passed as `--id <id>`; the positional form `acli confluence page view 12345` fails with `required flag(s) "id" not set`
+- The body is empty (`"body": {}`) unless you pass an explicit `--body-format` (e.g. `storage`, `view`, `atlas_doc_format`)
+- Without `--json`, only the metadata table is printed and the body is never shown; use `--body-format view --json` and read `.body.view.value` to get readable page content
+- `storage` and `view` output is raw XHTML (Confluence macros, `local-id` attributes); there is no markdown/ADF conversion
 
 ## Batch Operations
 
