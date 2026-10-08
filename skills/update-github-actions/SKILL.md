@@ -1,6 +1,6 @@
 ---
 name: update-github-actions
-description: "Update outdated GitHub Actions in workflow files and pin them to commit hashes for supply-chain security. Use when the user says 'update github actions', 'update actions', 'bump github actions', 'update workflow actions', 'pin github actions', 'update action versions', 'bump action versions', 'update workflow dependencies', 'pin actions to sha', or any variation of wanting to update or pin GitHub Actions used in .github/workflows."
+description: "Update outdated GitHub Actions in workflow files and pin them to commit hashes for supply-chain security. Triggers: 'update github actions', 'bump action versions', 'pin actions to sha'."
 disable-model-invocation: true
 allowed-tools: Bash(gh api *)
 ---

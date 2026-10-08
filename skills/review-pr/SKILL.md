@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: "Review a pull request for issues and feedback. Use when the user says 'review this PR', 'check this PR', 'look at PR changes', 'review the diff', 'what do you think of this PR', 'post review comments', 'any issues with this PR', 'what changed in this PR', 'are there problems with these changes', 'critique the diff', or any variation of wanting PR feedback or code review."
+description: "Review a pull request for issues and feedback. Triggers: 'review this PR', 'review the diff', 'post review comments', 'any issues with this PR'."
 argument-hint: "[findings|fix|post]"
 disable-model-invocation: true
 ---

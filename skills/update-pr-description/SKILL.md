@@ -1,6 +1,6 @@
 ---
 name: update-pr-description
-description: "Update the PR's title and description to accurately reflect the changes. Use when the user says 'update pr description', 'fix the pr title', 'update the PR body', 'rewrite pr description', 'the pr description is wrong', 'update pr details', or any variation of wanting to refresh or correct a pull request's title or description."
+description: "Update the PR's title and description to accurately reflect the changes. Triggers: 'update pr description', 'fix the pr title', 'the pr description is wrong'."
 disable-model-invocation: true
 ---
 

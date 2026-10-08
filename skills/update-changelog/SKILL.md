@@ -1,6 +1,6 @@
 ---
 name: update-changelog
-description: "Manage CHANGELOG.md files and GitHub releases — add new entries, backfill missing versions, sync release notes. Use when the user says 'update changelog', 'add changelog entry', 'changelog', 'update CHANGELOG.md', 'add to changelog', 'log this change', 'update github release', 'create release notes', 'sync release notes', 'backfill changelog', 'backfill releases', 'missing changelog entries', 'create releases from tags', or any variation of wanting to add, update, backfill, or sync changelog entries or GitHub releases."
+description: "Manage CHANGELOG.md files and GitHub releases: add new entries, backfill missing versions, sync release notes. Triggers: 'update changelog', 'add changelog entry', 'backfill releases', 'create releases from tags'."
 argument-hint: "[version] [description]"
 allowed-tools: Bash(git log *) Bash(git tag *) Bash(git diff *) Bash(gh release *) Bash(gh auth status *)
 disable-model-invocation: true

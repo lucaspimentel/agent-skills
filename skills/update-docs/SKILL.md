@@ -1,6 +1,6 @@
 ---
 name: update-docs
-description: "Update project documentation based on recent changes and current codebase state. Use when the user says 'update docs', 'update readme', 'sync docs', 'docs are stale', 'update CLAUDE.md', 'refresh documentation', or any variation of wanting documentation updated."
+description: "Update project documentation based on recent changes and current codebase state. Triggers: 'update docs', 'update readme', 'update CLAUDE.md', 'docs are stale'."
 context: fork
 agent: general-purpose
 disable-model-invocation: true

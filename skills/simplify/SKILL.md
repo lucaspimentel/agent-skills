@@ -1,6 +1,6 @@
 ---
 name: simplify
-description: "Review recently changed code for simplification and apply clarity improvements. Use when the user says 'simplify', 'simplify my changes', 'simplify this PR', 'clean up my diff', 'review what I just changed', 'simplify the last commit', 'simplify pending changes', 'tidy up the changed lines', or any variation of wanting changed code simplified for clarity, consistency, and maintainability. With no argument, reviews the current branch's open PR (or the branch vs the default branch). Accepts 'pending changes', 'last commit', or a free-form description of what to review (paths, commits, ranges)."
+description: "Review recently changed code for simplification and apply clarity improvements. Triggers: 'simplify', 'clean up my diff', 'simplify the last commit'. With no argument, reviews the current branch's open PR (or the branch vs the default branch). Accepts 'pending changes', 'last commit', or a free-form description of what to review (paths, commits, ranges)."
 argument-hint: "[pending changes | last commit | <anything>]"
 disable-model-invocation: true
 ---

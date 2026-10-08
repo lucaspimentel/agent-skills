@@ -1,6 +1,6 @@
 ---
 name: whats-next
-description: "Show a prioritized list of incomplete tasks from TODO.md. Use when the user says 'what's next', 'next task', 'what should I work on', 'what's up next', 'what tasks remain', or any variation of wanting to see the outstanding TODO items."
+description: "Show a prioritized list of incomplete tasks from TODO.md. Triggers: 'what's next', 'what should I work on'."
 disable-model-invocation: true
 ---
 

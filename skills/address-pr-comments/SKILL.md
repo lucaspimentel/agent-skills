@@ -1,6 +1,6 @@
 ---
 name: address-pr-comments
-description: "Interactively walk through and address PR review comments one at a time, asking the user what to do for each, committing after each code change, and optionally replying on GitHub. Use when the user says 'address pr comments', 'address review comments', 'reply to pr comments', 'fix pr comments', 'work through pr comments', 'go through review comments', 'address feedback', 'handle pr comments', 'resolve pr comments', 'respond to reviewers', or any variation of wanting to work through pull request review comments. Accepts an optional PR number argument; defaults to the current branch's PR."
+description: "Interactively walk through and address PR review comments one at a time, asking the user what to do for each, committing after each code change, and optionally replying on GitHub. Triggers: 'address review comments', 'resolve pr comments', 'respond to reviewers'. Accepts an optional PR number argument; defaults to the current branch's PR."
 argument-hint: "[PR number]"
 disable-model-invocation: true
 ---
