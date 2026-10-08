@@ -2,7 +2,7 @@
 
 Working with Jira, Confluence, and other Atlassian products via the Atlassian CLI (`acli`) or the hosted Atlassian MCP server: authentication, JQL/CQL searches, bulk operations, sprint reports, cross-product queries.
 
-Authored by [Jakob He](https://github.com/leweii), repackaged from [leweii/atlassian-cli](https://github.com/leweii/atlassian-cli) under the MIT License. The skill has been locally updated beyond upstream v1.0.0 with command-surface additions (the `board get` deprecation note, additional `workitem` actions, and Confluence `page`/`blog` entities); re-check upstream before treating any copy differences as unintentional drift.
+Authored by [Jakob He](https://github.com/leweii), repackaged from [leweii/atlassian-cli](https://github.com/leweii/atlassian-cli) under the MIT License. The skill has been locally updated beyond upstream v1.0.0: the command surface was verified against acli 1.3.39 (the `board get` deprecation note, additional `workitem` actions, and Confluence `page`/`blog` entities), and guidance was added for choosing between `acli` and the hosted Atlassian MCP server. Re-check upstream before treating any copy differences as unintentional drift.
 
 See [installation instructions](../../README.md#install).
 
