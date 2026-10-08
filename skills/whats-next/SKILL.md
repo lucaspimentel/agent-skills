@@ -1,6 +1,6 @@
 ---
 name: whats-next
-description: "Show a prioritized list of incomplete tasks from TODO.md. Triggers: 'what's next', 'what should I work on'."
+description: "Show a prioritized list of incomplete tasks from TODO.md."
 disable-model-invocation: true
 ---
 

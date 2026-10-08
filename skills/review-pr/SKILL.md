@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: "Review a pull request for issues and feedback. Triggers: 'review this PR', 'review the diff', 'post review comments', 'any issues with this PR'."
+description: "Review a pull request for issues and feedback."
 argument-hint: "[findings|fix|post]"
 disable-model-invocation: true
 ---

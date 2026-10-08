@@ -1,6 +1,6 @@
 ---
 name: update-pr-description
-description: "Update the PR's title and description to accurately reflect the changes. Triggers: 'update pr description', 'fix the pr title', 'the pr description is wrong'."
+description: "Update the PR's title and description to accurately reflect the changes."
 disable-model-invocation: true
 ---
 

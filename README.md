@@ -74,7 +74,7 @@ agent-skills/
 
 ## Editing a skill
 
-Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next session (pi: `/reload`). Keep descriptions under 1024 characters. For slash-only skills, append a short trigger list (one phrase per distinct use, no "Use when the user says..." phrasing): it drives command-menu discoverability and any future switch to model invocation. Conventions for forking third-party skills and attribution live in [AGENTS.md](AGENTS.md).
+Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next session (pi: `/reload`). Keep descriptions under 1024 characters. Slash-only skills get a plain one-line summary with no trigger lists or "Use when..." phrasing: only the user invokes them, so the description describes rather than triggers. Conventions for forking third-party skills and attribution live in [AGENTS.md](AGENTS.md).
 
 ## Validation
 

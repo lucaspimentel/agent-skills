@@ -1,6 +1,6 @@
 ---
 name: ship
-description: "Run one or more release actions: version, changelog, docs, commit, tag, push, watch, release. With no arguments, auto-detects needed actions from repo state and asks for confirmation. Triggers: 'ship', 'release', 'publish', 'version and push', 'tag and push', 'ship and watch'."
+description: "Run one or more release actions: version, changelog, docs, commit, tag, push, watch, release. With no arguments, auto-detects needed actions from repo state and asks for confirmation."
 argument-hint: "[<target>] [version] [changelog] [docs] [commit] [tag] [push] [watch] [release] [major|minor|patch|x.y.z]"
 allowed-tools: Bash(git status *) Bash(git log *) Bash(git tag --list *) Bash(git rev-parse *) Bash(git diff *) Bash(gh run list *) Bash(gh run watch *) Bash(gh release list *) Bash(sleep *)
 disable-model-invocation: true

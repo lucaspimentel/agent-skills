@@ -1,6 +1,6 @@
 ---
 name: add-todo
-description: "Create or append tasks to TODO.md in the current working directory. Triggers: 'add todo', 'new task', 'note this down', 'backlog'. Not appropriate for reading, viewing, checking off, removing, or reorganizing TODO.md."
+description: "Create or append tasks to TODO.md in the current working directory. Not appropriate for reading, viewing, checking off, removing, or reorganizing TODO.md."
 disable-model-invocation: true
 ---
 

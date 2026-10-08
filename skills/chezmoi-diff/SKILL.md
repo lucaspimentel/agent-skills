@@ -2,14 +2,7 @@
 name: chezmoi-diff
 disable-model-invocation: true
 allowed-tools: Bash(chezmoi status *) Bash(chezmoi diff *) Bash(chezmoi cat *) Bash(chezmoi source-path *) Bash(chezmoi target-path *) Bash(git status *) Bash(git add *) Bash(git commit *) Bash(git diff *) Bash(git log *)
-description: >
-  Help resolve differences between chezmoi-managed dotfiles and local files.
-  Use this skill whenever the user mentions chezmoi, dotfiles sync, chezmoi update,
-  chezmoi apply, chezmoi diff, or wants to compare/resolve their chezmoi source
-  files with local destination files. Also trigger when the user wants to understand
-  what changed in their dotfiles, which direction changes should flow (source→local
-  or local→source), or needs help interpreting chezmoi file naming conventions
-  (dot_, executable_, .tmpl, symlink_, etc.).
+description: "Help resolve differences between chezmoi-managed dotfiles and local files, including which direction changes should flow and what the chezmoi file naming conventions (dot_, executable_, .tmpl, symlink_, etc.) mean."
 ---
 
 # Chezmoi Diff Resolution
