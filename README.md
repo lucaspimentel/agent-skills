@@ -20,6 +20,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `update-github-actions` | Update and pin GitHub Actions to commit SHAs | `/update-github-actions` |
 | `atlassian` | Atlassian work via the acli CLI or the Atlassian MCP server: Jira, Confluence, bulk ops, sprint reports | Model-invoked |
 | `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | `/zsa-layouts` |
+| `plan` | Self-contained implementation plan as a handoff prompt | `/plan` |
 | `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
 | `tdd` | Test-driven red-green-refactor loop with test-quality rules | Model-invoked |
 | `diagnosing-bugs` | Diagnosis loop for hard bugs: build and tighten a feedback loop | Model-invoked |
