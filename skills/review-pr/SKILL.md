@@ -24,6 +24,28 @@ If no argument is provided, run the findings phase first, then use `AskUserQuest
 3. For large PRs, prioritize the most-changed files first
 4. Focus on actionable issues, not positive feedback
 
+## Delegation
+
+When the host provides a subagent delegation tool, delegate the findings phase to a subagent instead of reviewing inline. Resolve the repository and PR number first (Review Steps, step 1) so the dispatch can name its target. Try dispatch targets in this order, skipping any that a prior dispatch error already ruled out; fall back to an inline review under Review Steps only when no rung applies.
+
+1. A reviewer agent: one whose role is code review (in pi's subagent extension: `reviewer`).
+2. A read-only agent: an unknown-agent error lists the available agents; pick one whose toolset is restricted to read-style tools and includes read-only GitHub access (in pi's subagent extension: `scout`).
+3. Any remaining listed agent, even one with write tools: the dispatch task's read-only rule is then the only guard, so state it prominently.
+4. No delegation tool: run the Findings Phase inline yourself.
+
+### Dispatch task
+
+Subagents run in isolated context, so the dispatch must be self-contained. Include:
+
+- The repository (owner/name) and PR number, and an instruction to fetch the PR details and diff itself with its read-only gh tool.
+- The read-only rule: review only, no file modifications, no git mutations, and no writes to GitHub (never `gh api` writes or review posting).
+- The review rules from Review Steps: the generated/vendored skip list and the large-PR prioritization.
+- The full findings contract from the Findings Phase section, restated: the severity emoji labels with their definitions, the sort order, one line per issue with `file_path:line_number` and a brief description, and the no-issues outcome.
+
+### Presenting the result
+
+Relay the subagent's findings verbatim: they are the review output, not raw material to rewrite. Check them against the findings contract before presenting, and repair missing required elements inline if needed (for example, missing severity labels). Everything after the findings phase is always yours: mode selection, `AskUserQuestion`, the Fix Flow, and the Post Flow are never delegated.
+
 ## Findings Phase (always run first)
 
 - Display all review findings in the CLI output only
