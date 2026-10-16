@@ -47,7 +47,7 @@ For each unresolved thread, run this per-thread workflow in order:
 
 - Header: `@author — file:line` (prefix author with `[🤖]` if `authorIsBot`)
 - Full comment body (and any reply context in the thread)
-- Read the cited path ±15 lines around the commented line, then show the user the filename, line numbers, and a code snippet (±5–10 lines around the commented line) so they have immediate context without needing to ask
+- Read the cited path ±15 lines around the commented line for immediate context. Show the user code excerpts only when the specific lines matter for the assessment, as part of the step 3 output below, cited as `file_path:line`; do not present a mandatory standalone snippet
 
 ### 2. Investigate (read-only, bounded)
 
@@ -65,21 +65,15 @@ Assess the comment automatically using only read-only operations, bounded as fol
 
 ### 3. Present the assessment
 
-Present a concise assessment in this format before prompting for a decision:
+Present a concise assessment as normal Markdown before prompting for a decision. Do not wrap the assessment in a code fence: prose renders with Markdown formatting, and code fences are reserved for actual code or literal output. Use this shape, in order:
 
-```text
-Reviewer's concern:
-<brief explanation of what the reviewer wants>
+1. A short heading summarizing the concern, e.g. `#### <one-line concern summary>`
+2. A verdict-first summary: one or two sentences opening with the verdict, e.g. `**Verdict: correct.** <key behavior sentence(s)>`, where the verdict is exactly one of `correct`, `partially correct`, `incorrect`, or `unclear` (step 4 keys on `unclear`)
+3. When specific lines matter for the verdict, a single code excerpt fenced with the real language tag (e.g. ```rust), cited as `file_path:line`
+4. `**Evidence:**` followed by 2 to 3 tight bullets by default (expand only when genuinely needed), each tied to concrete `file_path:line` references
+5. A one-line `**Recommendation:**`: apply suggestion / fix differently / no code change / further validation
 
-Assessment:
-<correct / partially correct / incorrect / unclear>
-
-Evidence:
-<relevant behavior and code locations, with concrete file paths and line numbers>
-
-Recommended action:
-<apply suggestion / fix differently / no code change / further validation>
-```
+Separate verified behavior from inferred intent: state only what the code shows, and label inferences as inferences (e.g. "this reads as intentional, though the code alone does not show intent").
 
 ### 4. Conditional validation gate (only when needed)
 
