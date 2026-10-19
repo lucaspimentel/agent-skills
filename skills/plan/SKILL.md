@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Produce a self-contained implementation plan as a handoff prompt. Invoke explicitly with /plan <task>, or /plan with no task to infer one from the conversation.
+description: Produce a self-contained implementation plan as a handoff prompt. Invoke explicitly with /plan [task], or /plan with no task to infer one from the conversation.
 argument-hint: "[task]"
 disable-model-invocation: true
 ---
