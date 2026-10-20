@@ -31,9 +31,13 @@ Update the PR's title and description to accurately reflect the changes.
   - Breaking changes or migration notes (if applicable)
 - Keep concise but complete
 - Use bullet points for clarity
-- End the description with a short, witty joke formatted as a quote from Claude:
-  > *"[joke here]"* — Claude 🤖
-  If the existing PR description already has a joke, keep the existing one.
+- The joke footer is opt-in, never automatic:
+  1. Generate three short, concrete joke candidates appropriate to the changes; include the existing joke as a candidate if the description already has one.
+  2. Ask the user which to use via the host's structured question tool (e.g., AskUserQuestion in Claude Code, ask_user_question in pi, or the equivalent); present the actual joke text in each option plus an explicit "No joke" choice.
+  3. Wait for the answer. If the tool is unavailable or the question goes unanswered, stop before applying the PR update; do not infer consent.
+- Only the selected candidate becomes the footer, formatted as an italicized quote with no model, agent, or harness name:
+  > *"[selected joke]"* 🤖
+- If the user selects "No joke", omit the joke footer and remove any existing joke footer and attribution. Otherwise, replace an existing joke with the selected candidate. Never keep or add a joke the user did not select.
 
 ## Updating PR
 
