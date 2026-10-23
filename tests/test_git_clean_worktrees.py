@@ -858,6 +858,14 @@ class IntegrationBase(unittest.TestCase):
     def blocking_text(self, entry: dict) -> str:
         return " | ".join(entry["eligibility"]["blocking"])
 
+    def same_paths(self, values) -> list[str]:
+        # Git reports resolved paths (macOS /private/var, Windows 8.3 short names),
+        # so compare the way the helper does instead of comparing raw strings.
+        return [gcw.canonical(value) for value in values]
+
+    def statuses_by_path(self, result: dict) -> dict[str, str]:
+        return {gcw.canonical(item["id"]): item["status"] for item in result["actions"]}
+
     def exclude(self, *patterns: str) -> None:
         path = self.repo.root / ".git" / "info" / "exclude"
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -999,7 +1007,7 @@ class DiscoveryTests(IntegrationBase):
         entry = self.entry_for(snapshot, path)
         self.assertIn("prunable", self.blocking_text(entry))
         branch = self.branch_for(snapshot, "prunable-topic")
-        self.assertIn(path, branch["used_by_worktrees"])
+        self.assertIn(gcw.canonical(path), self.same_paths(branch["used_by_worktrees"]))
         with self.assertRaises(gcw.HelperError) as caught:
             gcw.build_plan(snapshot, delete_branches=["prunable-topic"])
         self.assertIn("still used", str(caught.exception))
@@ -1007,7 +1015,7 @@ class DiscoveryTests(IntegrationBase):
     def test_live_worktree_branch_records_its_registration(self):
         path = self.new_topic_worktree(branch="live-topic", location="wt-live")
         branch = self.branch_for(self.inspect(), "live-topic")
-        self.assertEqual(branch["used_by_worktrees"], [path])
+        self.assertEqual(self.same_paths(branch["used_by_worktrees"]), self.same_paths([path]))
 
     def test_branch_usage_records_every_registration(self):
         records = [
@@ -1245,7 +1253,7 @@ class ApplyTests(IntegrationBase):
         self.assertEqual(code, 0)
         self.assertFalse(os.path.exists(path))
         self.assertFalse(self.ref_exists("refs/heads/topic"))
-        self.assertEqual(result["removed_worktrees"], [path])
+        self.assertEqual(self.same_paths(result["removed_worktrees"]), self.same_paths([path]))
         self.assertIn("refs/heads/topic", result["deleted_shas"])
 
     def test_worktree_removal_does_not_implicitly_delete_the_branch(self):
@@ -1288,9 +1296,9 @@ class ApplyTests(IntegrationBase):
         self.fixture.write(Path(first) / "a.txt", "changed\n")
         result, code = self.apply(document)
         self.assertEqual(code, 2)
-        statuses = {item["id"]: item["status"] for item in result["actions"]}
-        self.assertEqual(statuses[first], "skipped")
-        self.assertEqual(statuses[second], "removed")
+        statuses = self.statuses_by_path(result)
+        self.assertEqual(statuses[gcw.canonical(first)], "skipped")
+        self.assertEqual(statuses[gcw.canonical(second)], "removed")
         self.assertFalse(os.path.exists(second))
         self.assertFalse(self.ref_exists("refs/heads/topic-b"))
         # The skipped worktree keeps its branch, exactly as the safety rule requires.
@@ -1377,7 +1385,9 @@ class ApplyTests(IntegrationBase):
             "branch": extra["branch"],
         }
         document["plan"]["retained"] = [
-            item for item in document["plan"]["retained"] if not (item["kind"] == "worktree" and item["id"] == second)
+            item
+            for item in document["plan"]["retained"]
+            if not (item["kind"] == "worktree" and gcw.canonical(item["id"]) == gcw.canonical(second))
         ]
         with self.assertRaises(gcw.HelperError) as caught:
             self.apply(document)
@@ -1387,7 +1397,9 @@ class ApplyTests(IntegrationBase):
     def test_action_not_recorded_in_expected_is_rejected(self):
         path = self.new_topic_worktree()
         document = self.plan_for(remove=[path])
-        del document["plan"]["expected"]["worktrees"][path]
+        expected = document["plan"]["expected"]["worktrees"]
+        key = next(item for item in expected if gcw.canonical(item) == gcw.canonical(path))
+        del expected[key]
         with self.assertRaises(gcw.HelperError):
             gcw.validate_plan(document["plan"])
 
@@ -1663,7 +1675,7 @@ class CommandLineTests(IntegrationBase):
         )
         self.assertEqual(code, 0)
         result = json.loads(Path(result_path).read_text(encoding="utf-8"))
-        self.assertEqual(result["removed_worktrees"], [path])
+        self.assertEqual(self.same_paths(result["removed_worktrees"]), self.same_paths([path]))
         self.assertFalse(os.path.exists(path))
         self.assertIn("removed_worktrees", out)
 
@@ -1685,6 +1697,33 @@ class CommandLineTests(IntegrationBase):
         )
         self.assertEqual(code, 2)
         self.assertIn("\"skipped\"", out)
+
+
+class PathAliasTests(IntegrationBase):
+    """Git reports resolved paths; selections and results must tolerate aliases."""
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlinks unavailable")
+    def test_selection_and_result_tolerate_an_aliased_path_form(self):
+        alias_root = self.base / "alias-root"
+        try:
+            os.symlink(str(self.base), str(alias_root))
+        except (OSError, NotImplementedError):
+            self.skipTest("symlink creation is not permitted")
+        path = self.new_topic_worktree()
+        aliased = str(alias_root / "wt-topic")
+        self.assertNotEqual(aliased, path)
+        self.assertEqual(gcw.canonical(aliased), gcw.canonical(path))
+
+        snapshot = gcw.inspect_repository(self.runner, self.repo.path, gh=gh_client(self.runner)[0])
+        entry = self.entry_for(snapshot, aliased)
+        self.assertTrue(entry["eligibility"]["eligible"], self.blocking_text(entry))
+        plan = gcw.build_plan(snapshot, remove_worktrees=[aliased], delete_branches=["topic"])
+        self.assertEqual(gcw.canonical(plan["actions"][0]["id"]), gcw.canonical(path))
+        gh, _ = gh_client(self.runner)
+        result, code = gcw.apply_plan(self.runner, plan, gcw.plan_digest(plan), gh=gh)
+        self.assertEqual(code, 0, result)
+        self.assertFalse(os.path.exists(path))
+        self.assertEqual(gcw.canonical(result["removed_worktrees"][0]), gcw.canonical(path))
 
 
 class SummaryTests(unittest.TestCase):
