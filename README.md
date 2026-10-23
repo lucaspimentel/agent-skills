@@ -20,6 +20,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `update-github-actions` | Update and pin GitHub Actions to commit SHAs | `/update-github-actions` |
 | `atlassian` | Atlassian work via the acli CLI or the Atlassian MCP server: Jira, Confluence, bulk ops, sprint reports | Model-invoked |
 | `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | `/zsa-layouts` |
+| `git-clean-worktrees` | Remove preserved linked worktrees and local branches from one repository, through a digest-approved plan | `/git-clean-worktrees` |
 | `plan` | Self-contained implementation plan as a handoff prompt | `/plan` |
 | `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
 | `tdd` | Test-driven red-green-refactor loop with test-quality rules | Model-invoked |
@@ -64,8 +65,10 @@ agent-skills/
 ├── NOTICE                   # attribution for third-party-derived skills
 ├── README.md
 ├── scripts/
-│   ├── validate.sh          # static checks for manifests and skills
+│   ├── validate.sh          # static checks plus the portable behavioral suite
 │   └── validate_skills.py   # skills-ref spec check with an allowlist
+├── tests/
+│   └── test_git_clean_worktrees.py  # offline behavioral tests (Python standard library)
 └── skills/
     └── <name>/
         ├── SKILL.md         # + optional supporting files (reference docs, scripts)
@@ -78,9 +81,18 @@ Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next
 
 ## Validation
 
-`scripts/validate.sh` runs the static checks that CI runs on every push to `main` and every pull request. It needs `claude` and `uv`, and no credentials.
+`scripts/validate.sh` runs the checks that CI runs on every push to `main` and every pull request: the static manifest and skill validation plus the portable behavioral suite. It needs `claude`, `uv`, Python 3.11+, and Git, and no credentials.
 
 - `claude plugin validate --strict` on the marketplace manifest, the plugin manifest, and `skills/`.
 - `scripts/validate_skills.py`, which applies the [Agent Skills spec](https://agentskills.io/specification) checks from [skills-ref](https://pypi.org/project/skills-ref/): frontmatter format, `name` rules (including matching the directory), `description` length, and unknown fields.
+- `python3 -m unittest discover -s tests -v`, the portable behavioral suite.
 
 The spec does not list `argument-hint`, `context`, `agent`, or `disable-model-invocation`, so `validate_skills.py` allows those four by name. The first three are Claude Code only; `disable-model-invocation` is honored by both Claude Code and pi. Any other field, including a misspelling of these, fails.
+
+`validate.sh` also runs the portable behavioral suite for `git-clean-worktrees`:
+
+```
+python3 -m unittest discover -s tests -v
+```
+
+The suite needs only Python 3.11+ and Git. It runs offline against disposable repositories and injected `gh` responses, so it needs no credentials and no real repository. A separate GitHub Actions job runs the same suite on Ubuntu, macOS, and Windows with Python 3.11 and native Git; the static Claude and skills-ref checks stay in the Ubuntu-only job and are not required for the behavioral tests.
