@@ -48,8 +48,10 @@ Register the repo as a plugin marketplace, then install the plugin:
 ### pi
 
 ```
-pi install https://github.com/lucaspimentel/agent-skills
+pi install git:github.com/lucaspimentel/agent-skills
 ```
+
+Pi installs packages from npm, git, or a local path, so the git form above is what this repo uses. The package key is `skills` in `package.json`, which registers `./skills` in one declaration.
 
 ## Layout
 
