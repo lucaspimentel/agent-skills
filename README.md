@@ -71,7 +71,8 @@ agent-skills/
 │   ├── validate.sh          # static checks plus the portable behavioral suite
 │   └── validate_skills.py   # skills-ref spec check with an allowlist
 ├── tests/
-│   └── test_git_clean_worktrees.py  # offline behavioral tests (Python standard library)
+│   ├── test_git_clean_worktrees.py  # offline behavioral tests (Python standard library)
+│   └── test_simplify_scope.py       # offline behavioral tests for the simplify scope script
 └── skills/
     └── <name>/
         ├── SKILL.md         # + optional supporting files (reference docs, scripts)
@@ -84,18 +85,18 @@ Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next
 
 ## Validation
 
-`scripts/validate.sh` runs the checks that CI runs on every push to `main` and every pull request: the static manifest and skill validation plus the portable behavioral suite. It needs `claude`, `uv`, Python 3.11+, and Git, and no credentials.
+`scripts/validate.sh` runs the checks that CI runs on every push to `main` and every pull request: the static manifest and skill validation plus the portable behavioral suites. It needs `claude`, `uv`, Python 3.11+, and Git, and no credentials.
 
 - `claude plugin validate --strict` on the marketplace manifest, the plugin manifest, and `skills/`.
 - `scripts/validate_skills.py`, which applies the [Agent Skills spec](https://agentskills.io/specification) checks from [skills-ref](https://pypi.org/project/skills-ref/): frontmatter format, `name` rules (including matching the directory), `description` length, and unknown fields.
-- `python3 -m unittest discover -s tests -v`, the portable behavioral suite.
+- `python3 -m unittest discover -s tests -v`, the portable behavioral suites.
 
 The spec does not list `argument-hint`, `context`, `agent`, or `disable-model-invocation`, so `validate_skills.py` allows those four by name. The first three are Claude Code only; `disable-model-invocation` is honored by both Claude Code and pi. Any other field, including a misspelling of these, fails.
 
-`validate.sh` also runs the portable behavioral suite for `git-clean-worktrees`:
+`validate.sh` also runs the portable behavioral suites for `git-clean-worktrees` and the `simplify` scope script:
 
 ```
 python3 -m unittest discover -s tests -v
 ```
 
-The suite needs only Python 3.11+ and Git. It runs offline against disposable repositories and injected `gh` responses, so it needs no credentials and no real repository. A separate GitHub Actions job runs the same suite on Ubuntu, macOS, and Windows with Python 3.11 and native Git; the static Claude and skills-ref checks stay in the Ubuntu-only job and are not required for the behavioral tests.
+The suites need only Python 3.11+, Git, and `bash`. They run offline against disposable repositories and injected `gh` responses, so they need no credentials and no real repository. A separate GitHub Actions job runs the same suites on Ubuntu, macOS, and Windows with Python 3.11 and native Git; the static Claude and skills-ref checks stay in the Ubuntu-only job and are not required for the behavioral tests.
