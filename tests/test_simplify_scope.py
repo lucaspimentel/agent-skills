@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -185,9 +186,10 @@ class ScopeScriptTests(unittest.TestCase):
 
     def test_last_commit_marks_file_with_uncommitted_changes_unavailable(self) -> None:
         work = self.standard_repo()
-        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n"))
+        changed = TEN_LINES.replace("2\n", "TWO\n")
+        self.write(work, "a.txt", changed)
         self.commit_all(work, "two")
-        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n") + "MORE\n")
+        self.write(work, "a.txt", changed + "MORE\n")
 
         result = self.scope("last-commit", cwd=work)
 
@@ -306,6 +308,18 @@ class ScopeScriptTests(unittest.TestCase):
         self.assertEqual(blocked.returncode, 6)
         self.assertIn("--allow-many", blocked.stderr)
         self.assertEqual(allowed.returncode, 0, allowed.stderr)
+
+    # MSYS expands wildcard arguments when bash.exe is spawned from a
+    # non-Cygwin process, so on Windows the pattern never reaches the script.
+    @unittest.skipIf(sys.platform == "win32", "MSYS globs wildcard argv before bash sees it")
+    def test_files_expands_a_glob(self) -> None:
+        work = self.standard_repo()
+
+        result = self.scope("files", "**/*.txt", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- a.txt (whole file in scope)", result.stdout)
+        self.assertIn("- src/b.txt (whole file in scope)", result.stdout)
 
     def test_files_missing_path_exits_5(self) -> None:
         work = self.standard_repo()

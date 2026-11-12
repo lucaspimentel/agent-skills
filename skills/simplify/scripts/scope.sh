@@ -53,8 +53,8 @@ g() {
 
 BASE=""
 END=""
-TARGET_DESC=""
 declare -a PATH_FILTER=()
+declare -a PATHSPEC=(--)
 
 # resolve_default_base sets BASE and TARGET_DESC for the default target.
 resolve_default_base() {
@@ -119,24 +119,24 @@ resolve_default_base() {
   TARGET_DESC="default branch (working tree vs merge-base ${BASE:0:7} with ${ref})${pr_note}"
 }
 
-# path_args prints the pathspec arguments for the current PATH_FILTER.
-path_args() {
-  local -a args=(--)
-  if [[ ${#PATH_FILTER[@]} -gt 0 ]]; then
-    args=(-- "${PATH_FILTER[@]}")
-  fi
-  printf '%s\0' "${args[@]}"
-}
-
 declare -a FILE_STATUS=()
 declare -a FILE_PATH=()
+UNCOMMITTED=""
+
+# Load the set of files that differ from HEAD once per run: a per-file
+# `git diff --quiet` costs an extra process for every file in a commit target.
+load_uncommitted_files() {
+  UNCOMMITTED=$(g diff --name-only HEAD 2>/dev/null) || UNCOMMITTED=""
+}
+
+is_uncommitted() {
+  case $'\n'"$UNCOMMITTED"$'\n' in
+    *$'\n'"$1"$'\n'*) return 0 ;;
+  esac
+  return 1
+}
 
 list_changed_files() {
-  local -a spec=()
-  while IFS= read -r -d '' item; do
-    spec+=("$item")
-  done < <(path_args)
-
   local tok
   while IFS= read -r -d '' tok; do
     case $tok in
@@ -154,41 +154,25 @@ list_changed_files() {
         FILE_PATH+=("$path")
         ;;
     esac
-  done < <(if [[ -n $END ]]; then
-             g diff --name-status -z -M "$BASE" "$END" "${spec[@]}"
-           else
-             g diff --name-status -z -M "$BASE" "${spec[@]}"
-           fi)
+  done < <(g diff --name-status -z -M "$BASE" ${END:+"$END"} "${PATHSPEC[@]}")
 }
 
 list_untracked_files() {
-  local -a spec=()
-  while IFS= read -r -d '' item; do
-    spec+=("$item")
-  done < <(path_args)
-
   local path
   while IFS= read -r -d '' path; do
     FILE_STATUS+=("A")
     FILE_PATH+=("$path")
-  done < <(git ls-files -z --others --exclude-standard "${spec[@]}")
+  done < <(git ls-files -z --others --exclude-standard "${PATHSPEC[@]}")
 }
 
 # compute_ranges prints "12, 30-45", "UNAVAILABLE", or "DELETIONS" for one path.
 compute_ranges() {
   local path=$1
   local diff_out=""
-  if [[ -n $END ]]; then
-    diff_out=$(g diff -U0 --no-color --no-ext-diff "$BASE" "$END" -- "$path") || {
-      printf 'UNAVAILABLE'
-      return 0
-    }
-  else
-    diff_out=$(g diff -U0 --no-color --no-ext-diff "$BASE" -- "$path") || {
-      printf 'UNAVAILABLE'
-      return 0
-    }
-  fi
+  diff_out=$(g diff -U0 --no-color --no-ext-diff "$BASE" ${END:+"$END"} -- "$path") || {
+    printf 'UNAVAILABLE'
+    return 0
+  }
 
   local -a starts=()
   local -a ends=()
@@ -277,7 +261,7 @@ print_scope_list() {
       printf -- '- %s (added; entire file is in scope)\n' "$path"
       continue
     fi
-    if [[ -n $END ]] && ! git diff --quiet HEAD -- "$path" 2>/dev/null; then
+    if [[ -n $END ]] && is_uncommitted "$path"; then
       printf -- '- %s (%s; changed lines unavailable, inspect git diff before editing)\n' "$path" "$status"
       continue
     fi
@@ -287,9 +271,6 @@ print_scope_list() {
         printf -- '- %s (%s; changed lines unavailable, inspect git diff before editing)\n' "$path" "$status"
         ;;
       DELETIONS)
-        printf -- '- %s (%s; deletions only, no current lines to simplify)\n' "$path" "$status"
-        ;;
-      '')
         printf -- '- %s (%s; deletions only, no current lines to simplify)\n' "$path" "$status"
         ;;
       *)
@@ -315,10 +296,6 @@ print_target_line() {
 
 declare -a WHOLE_FILES=()
 
-add_whole_file() {
-  WHOLE_FILES+=("$1")
-}
-
 dedup_whole_files() {
   [[ ${#WHOLE_FILES[@]} -gt 0 ]] || return 0
   local sorted
@@ -332,31 +309,38 @@ dedup_whole_files() {
   done <<<"$sorted"
 }
 
+# Git pathspecs are not shell globs: '**/x' skips root-level files and '*'
+# crosses directories. ':(glob)' restores the globstar semantics the skill
+# documents, so apply it whenever the argument actually contains a wildcard.
+pathspec_for() {
+  case $1 in
+    *\** | *\?* | *\[*) printf ':(glob)%s' "$1" ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 collect_whole_files() {
-  local arg matched p
+  local arg matched p spec
   for arg in "$@"; do
-    if [[ -d $arg ]]; then
-      while IFS= read -r -d '' p; do
-        [[ -e $p ]] || continue
-        add_whole_file "$p"
-      done < <(git ls-files -z -- "$arg")
-      while IFS= read -r -d '' p; do
-        add_whole_file "$p"
-      done < <(git ls-files -z --others --exclude-standard -- "$arg")
-    elif [[ -f $arg ]]; then
-      add_whole_file "$arg"
-    else
-      matched=0
-      while IFS= read -r -d '' p; do
-        [[ -e $p ]] || continue
-        add_whole_file "$p"
+    if [[ -f $arg ]]; then
+      WHOLE_FILES+=("$arg")
+      continue
+    fi
+    spec=$(pathspec_for "$arg")
+    # Tracked files that are gone from the working tree are not in scope.
+    matched=0
+    while IFS= read -r -d '' p; do
+      if [[ -e $p ]]; then
+        WHOLE_FILES+=("$p")
         matched=1
-      done < <(git ls-files -z -- "$arg")
-      while IFS= read -r -d '' p; do
-        add_whole_file "$p"
-        matched=1
-      done < <(git ls-files -z --others --exclude-standard -- "$arg")
-      [[ $matched == 1 ]] || die 5 "path does not exist or matches nothing: $arg"
+      fi
+    done < <(git ls-files -z -- "$spec")
+    while IFS= read -r -d '' p; do
+      WHOLE_FILES+=("$p")
+      matched=1
+    done < <(git ls-files -z --others --exclude-standard -- "$spec")
+    if [[ ! -d $arg && $matched == 0 ]]; then
+      die 5 "path does not exist or matches nothing: $arg"
     fi
   done
 }
@@ -473,6 +457,10 @@ if [[ -n $REPO_PREFIX ]]; then
   fi
 fi
 
+if [[ ${#PATH_FILTER[@]} -gt 0 ]]; then
+  PATHSPEC=(-- "${PATH_FILTER[@]}")
+fi
+
 # ---------------------------------------------------------------------------
 # Resolve the target
 # ---------------------------------------------------------------------------
@@ -541,6 +529,10 @@ esac
 
 if [[ ${#FILE_PATH[@]} -eq 0 ]]; then
   die 7 "no changes to simplify for the resolved target"
+fi
+
+if [[ -n $END ]]; then
+  load_uncommitted_files
 fi
 
 print_scope_list
