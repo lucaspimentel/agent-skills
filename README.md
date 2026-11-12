@@ -12,7 +12,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `add-todo` | Append tasks to TODO.md | `/add-todo` |
 | `whats-next` | Prioritized list of incomplete TODO.md tasks | `/whats-next` |
 | `review-pr` | Review a pull request and provide feedback | `/review-pr` |
-| `simplify` | Simplify recently changed code within diff scope | `/simplify` |
+| `simplify` | Quality-only cleanup of recently changed code within diff scope | `/agent-skills:simplify` |
 | `address-pr-comments` | Work through PR review comments one at a time | `/address-pr-comments` |
 | `update-pr-description` | Refresh a PR's title and description | `/update-pr-description` |
 | `update-docs` | Sync project docs with the current codebase | `/update-docs` |
@@ -30,6 +30,8 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 `grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed. See `NOTICE` and the `LICENSE` file in each skill directory.
 
 Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions.
+
+Claude Code's built-in `/simplify` shadows the bare name, so this repo's `simplify` skill is invoked as `/agent-skills:simplify` there. No other skill collides with a built-in.
 
 Claude-specific frontmatter (`argument-hint`, `context`, `agent`) is carried in the shared files; pi ignores unknown fields.
 
