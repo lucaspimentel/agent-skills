@@ -63,6 +63,7 @@ agent-skills/
 ├── .claude-plugin/
 │   ├── marketplace.json     # Claude Code marketplace manifest
 │   └── plugin.json          # plugin: skills/ at repo root
+├── .gitattributes           # shell scripts keep LF endings on every platform
 ├── package.json             # pi package manifest: pi.skills = ["./skills"]
 ├── LICENSE
 ├── NOTICE                   # attribution for third-party-derived skills

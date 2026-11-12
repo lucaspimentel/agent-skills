@@ -8,6 +8,8 @@ Edit `skills/<name>/SKILL.md` directly; see README.md ("Editing a skill") for de
 
 Run `scripts/validate.sh` before committing. A new frontmatter field outside the Agent Skills spec must be added to `EXTRA_FIELDS` in `scripts/validate_skills.py`.
 
+Scripts a skill points at must run under bash 3.2: macOS CI uses `/bin/bash`, where `set -u` plus an empty `"${arr[@]}"` is an error. Shell scripts stay LF (`*.sh text eol=lf` in `.gitattributes`) so they run on every platform.
+
 ## Forking a third-party skill
 
 Follow the convention in `NOTICE`: upstream LICENSE reproduced verbatim as the skill dir's `LICENSE`, an entry in `NOTICE`, a README table row, and a provenance HTML comment in SKILL.md.
