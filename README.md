@@ -7,31 +7,31 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | Skill | Purpose | Invocation |
 |---|---|---|
 | `git-commit` | Commit pending changes, optionally pushing | Model-invoked |
-| `chezmoi-diff` | Resolve differences between chezmoi source and local dotfiles | `/chezmoi-diff` |
-| `ship` | Release automation: version, changelog, docs, commit, tag, push, watch, release | `/ship` |
-| `add-todo` | Append tasks to TODO.md | `/add-todo` |
-| `whats-next` | Prioritized list of incomplete TODO.md tasks | `/whats-next` |
-| `review-pr` | Review a pull request and provide feedback | `/review-pr` |
+| `chezmoi-diff` | Resolve differences between chezmoi source and local dotfiles | `/agent-skills:chezmoi-diff` |
+| `ship` | Release automation: version, changelog, docs, commit, tag, push, watch, release | `/agent-skills:ship` |
+| `add-todo` | Append tasks to TODO.md | `/agent-skills:add-todo` |
+| `whats-next` | Prioritized list of incomplete TODO.md tasks | `/agent-skills:whats-next` |
+| `review-pr` | Review a pull request and provide feedback | `/agent-skills:review-pr` |
 | `simplify` | Quality-only cleanup of recently changed code within diff scope | `/agent-skills:simplify` |
-| `address-pr-comments` | Work through PR review comments one at a time | `/address-pr-comments` |
-| `update-pr-description` | Refresh a PR's title and description | `/update-pr-description` |
-| `update-docs` | Sync project docs with the current codebase | `/update-docs` |
-| `update-changelog` | Maintain CHANGELOG.md and GitHub releases | `/update-changelog` |
-| `update-github-actions` | Update and pin GitHub Actions to commit SHAs | `/update-github-actions` |
-| `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | `/zsa-layouts` |
-| `git-clean-worktrees` | Remove preserved linked worktrees and local branches from one repository, through a digest-approved plan | `/git-clean-worktrees` |
-| `plan` | Self-contained implementation plan as a handoff prompt | `/plan` |
-| `grill-me` | Relentless design interview until no ambiguities remain | `/grill-me` |
+| `address-pr-comments` | Work through PR review comments one at a time | `/agent-skills:address-pr-comments` |
+| `update-pr-description` | Refresh a PR's title and description | `/agent-skills:update-pr-description` |
+| `update-docs` | Sync project docs with the current codebase | `/agent-skills:update-docs` |
+| `update-changelog` | Maintain CHANGELOG.md and GitHub releases | `/agent-skills:update-changelog` |
+| `update-github-actions` | Update and pin GitHub Actions to commit SHAs | `/agent-skills:update-github-actions` |
+| `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | `/agent-skills:zsa-layouts` |
+| `git-clean-worktrees` | Remove preserved linked worktrees and local branches from one repository, through a digest-approved plan | `/agent-skills:git-clean-worktrees` |
+| `plan` | Self-contained implementation plan as a handoff prompt | `/agent-skills:plan` |
+| `grill-me` | Relentless design interview until no ambiguities remain | `/agent-skills:grill-me` |
 | `tdd` | Test-driven red-green-refactor loop with test-quality rules | Model-invoked |
 | `diagnosing-bugs` | Diagnosis loop for hard bugs: build and tighten a feedback loop | Model-invoked |
-| `session-handoff` | Compact the current conversation into a handoff document | `/session-handoff` |
+| `session-handoff` | Compact the current conversation into a handoff document | `/agent-skills:session-handoff` |
 | `writing-for-agents` | Reference for writing skills and AGENTS.md-style docs agents consume | Model-invoked |
 
 `grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed. See `NOTICE` and the `LICENSE` file in each skill directory.
 
-Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly: `/name` in Claude Code, `/skill:name` in pi. `git-commit`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions.
+Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly. Installed as a Claude Code plugin, every skill is namespaced under the plugin: `/agent-skills:<name>`. In pi, the form is `/skill:<name>`. `git-commit`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions, and can still be run by name.
 
-Claude Code's built-in `/simplify` shadows the bare name, so this repo's `simplify` skill is invoked as `/agent-skills:simplify` there. No other skill collides with a built-in.
+Claude Code ships its own bundled `simplify` skill, so typing `/simplify` runs that one; this repo's is `/agent-skills:simplify`.
 
 Claude-specific frontmatter (`argument-hint`, `context`, `agent`) is carried in the shared files; pi ignores unknown fields.
 
@@ -64,10 +64,13 @@ agent-skills/
 │   ├── marketplace.json     # Claude Code marketplace manifest
 │   └── plugin.json          # plugin: skills/ at repo root
 ├── .gitattributes           # shell scripts keep LF endings on every platform
+├── .gitignore
 ├── package.json             # pi package manifest: pi.skills = ["./skills"]
 ├── LICENSE
 ├── NOTICE                   # attribution for third-party-derived skills
 ├── README.md
+├── AGENTS.md                # repo conventions for agents
+├── TODO.md                  # backlog
 ├── scripts/
 │   ├── validate.sh          # static checks plus the portable behavioral suite
 │   └── validate_skills.py   # skills-ref spec check with an allowlist
@@ -82,7 +85,7 @@ agent-skills/
 
 ## Editing a skill
 
-Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next session (pi: `/reload`). Keep descriptions under 1024 characters. Slash-only skills get a plain one-line summary with no trigger lists or "Use when..." phrasing: only the user invokes them, so the description describes rather than triggers. Conventions for forking third-party skills and attribution live in [AGENTS.md](AGENTS.md).
+Edit `skills/<name>/SKILL.md` here; both agents pick up the change on their next session (pi: `/reload`). Keep descriptions under 1024 characters. Slash-only skills get a plain one-line summary with no trigger lists or "Use when..." phrasing: only the user invokes them, so the description describes rather than triggers. Conventions for forking third-party skills, attribution, and the scripts a skill ships live in [AGENTS.md](AGENTS.md).
 
 ## Validation
 

@@ -6,6 +6,8 @@ Dual-manifest repo: every skill in `skills/<name>/` serves both Claude Code (plu
 
 Edit `skills/<name>/SKILL.md` directly; see README.md ("Editing a skill") for description guidelines. Keep Claude-specific frontmatter (`argument-hint`, `context`, `agent`): pi ignores unknown fields.
 
+Refer to another skill by name in prose, not by a bare slash command: Claude Code namespaces plugin skills as `/agent-skills:<name>`, and pi uses `/skill:<name>`.
+
 Run `scripts/validate.sh` before committing. A new frontmatter field outside the Agent Skills spec must be added to `EXTRA_FIELDS` in `scripts/validate_skills.py`.
 
 Scripts a skill points at must run under bash 3.2: macOS CI uses `/bin/bash`, where `set -u` plus an empty `"${arr[@]}"` is an error. Shell scripts stay LF (`*.sh text eol=lf` in `.gitattributes`) so they run on every platform.
