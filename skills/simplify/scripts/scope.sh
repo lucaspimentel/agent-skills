@@ -280,7 +280,9 @@ print_scope_list() {
       printf -- '- %s (added; entire file is in scope)\n' "$path"
       continue
     fi
-    if [[ -n $END ]] && changed_since_end "$path"; then
+    # A path missing from the working tree was renamed or deleted after END;
+    # `git diff --name-only END` lists it under its new name, if any.
+    if [[ -n $END ]] && { [[ ! -e $path ]] || changed_since_end "$path"; }; then
       printf -- '- %s (%s; changed lines unavailable, inspect git diff before editing)\n' "$path" "$status"
       continue
     fi
@@ -338,8 +340,9 @@ pathspec_for() {
   esac
 }
 
-# to_repo_relative prints an existing path relative to the repository root, or
-# fails when it lies outside this repository (including a nested repository).
+# to_repo_relative prints an existing path relative to the repository root. It
+# returns 2 for a path inside a .git directory and 1 for a path outside this
+# repository (including a nested repository).
 to_repo_relative() {
   local p=$1 dir name="" top prefix
   if [[ -d $p ]]; then
@@ -352,6 +355,9 @@ to_repo_relative() {
       dir=/
     fi
     name=${p##*[/\\]}
+  fi
+  if [[ $(cd "$dir" 2>/dev/null && git rev-parse --is-inside-git-dir 2>/dev/null) == true ]]; then
+    return 2
   fi
   top=$(cd "$dir" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null) || return 1
   [[ $top == "$REPO_ROOT" ]] || return 1
@@ -367,7 +373,10 @@ collect_whole_files() {
     # Normalize an existing path through git, which handles symlinks, Windows
     # drive paths, and '..' segments, and rejects anything outside the repo.
     if [[ -e $arg ]]; then
-      rel=$(to_repo_relative "$arg") || die 5 "path is outside the repository: $arg"
+      rel=$(to_repo_relative "$arg") || {
+        [[ $? == 2 ]] && die 5 "path is inside a .git directory: $arg"
+        die 5 "path is outside the repository: $arg"
+      }
       if [[ -f $rel ]]; then
         WHOLE_FILES+=("$rel")
         continue

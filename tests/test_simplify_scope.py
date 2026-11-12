@@ -359,6 +359,30 @@ class ScopeScriptTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("- a.txt (M; changed lines: 2)", result.stdout)
 
+    def test_diff_ending_at_older_commit_marks_file_renamed_later_unavailable(self) -> None:
+        work = self.standard_repo()
+        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n"))
+        self.commit_all(work, "two")
+        self.git("mv", "a.txt", "renamed.txt", cwd=work)
+        self.commit_all(work, "rename")
+
+        result = self.scope("diff", "HEAD~2", "HEAD~1", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- a.txt (M; changed lines unavailable, inspect git diff before editing)", result.stdout)
+        self.assertNotIn("changed lines: 2", result.stdout)
+
+    def test_diff_ending_at_older_commit_marks_file_deleted_later_unavailable(self) -> None:
+        work = self.standard_repo()
+        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n"))
+        self.commit_all(work, "two")
+        (work / "a.txt").unlink()
+
+        result = self.scope("diff", "HEAD~1", "HEAD", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- a.txt (M; changed lines unavailable, inspect git diff before editing)", result.stdout)
+
     # -- files -----------------------------------------------------------
 
     def test_files_expands_directory_and_keeps_spaces(self) -> None:
@@ -450,6 +474,15 @@ class ScopeScriptTests(unittest.TestCase):
                 result = self.scope("files", *args, cwd=work)
                 self.assertEqual(result.returncode, 5, result.stdout)
                 self.assertNotIn("outside.txt", result.stdout)
+
+    def test_files_inside_git_directory_exits_5(self) -> None:
+        work = self.standard_repo()
+
+        for path in (".git/config", ".git"):
+            with self.subTest(path=path):
+                result = self.scope("files", path, cwd=work)
+                self.assertEqual(result.returncode, 5, result.stdout)
+                self.assertIn("inside a .git directory", result.stderr)
 
     def test_files_skips_deleted_tracked_file(self) -> None:
         work = self.standard_repo()
