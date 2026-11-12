@@ -125,13 +125,36 @@ class ScopeScriptTests(unittest.TestCase):
         self.assertIn("- a.txt (M; changed lines: 2)", result.stdout)
         self.assertIn("- u.txt (added; entire file is in scope)", result.stdout)
 
-    def test_pending_reports_deleted_file(self) -> None:
+    def test_pending_omits_deleted_file(self) -> None:
         work = self.standard_repo()
         (work / "src" / "b.txt").unlink()
+        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n"))
 
         result = self.scope("pending", cwd=work)
 
-        self.assertIn("- src/b.txt (D; deletions only, no current lines to simplify)", result.stdout)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("src/b.txt", result.stdout)
+        self.assertIn("- a.txt (M; changed lines: 2)", result.stdout)
+
+    def test_pending_modified_file_with_only_deletions(self) -> None:
+        work = self.standard_repo()
+        lines = TEN_LINES.splitlines(keepends=True)
+        self.write(work, "a.txt", "".join(lines[:5] + lines[6:]))
+
+        result = self.scope("pending", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- a.txt (M; deletions only, no current lines to simplify)", result.stdout)
+
+    def test_deletion_only_scope_exits_7(self) -> None:
+        work = self.standard_repo()
+        (work / "src" / "b.txt").unlink()
+
+        self.assertEqual(self.scope("pending", cwd=work).returncode, 7)
+
+        self.commit_all(work, "two")
+
+        self.assertEqual(self.scope("last-commit", cwd=work).returncode, 7)
 
     def test_pending_merges_adjacent_hunks(self) -> None:
         work = self.standard_repo()
@@ -232,6 +255,31 @@ class ScopeScriptTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Target: open PR on feature (working tree vs merge-base", result.stdout)
 
+    def test_default_without_pr_has_no_detection_note(self) -> None:
+        work = self.standard_repo()
+        self.git("checkout", "-q", "-b", "feature", cwd=work)
+        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n"))
+        self.commit_all(work, "two")
+        self.set_gh("#!/usr/bin/env bash\nprintf 'no pull requests found for branch \"feature\"\\n' >&2\nexit 1\n")
+
+        result = self.scope("default", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Target: default branch (working tree vs merge-base", result.stdout)
+        self.assertNotIn("PR detection unavailable", result.stdout)
+
+    def test_default_gh_failure_keeps_detection_note(self) -> None:
+        work = self.standard_repo()
+        self.git("checkout", "-q", "-b", "feature", cwd=work)
+        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n"))
+        self.commit_all(work, "two")
+        self.set_gh("#!/usr/bin/env bash\nprintf 'HTTP 401: Bad credentials\\n' >&2\nexit 1\n")
+
+        result = self.scope("default", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("(PR detection unavailable; using the default branch)", result.stdout)
+
     def test_default_detached_head_exits_3(self) -> None:
         work = self.standard_repo()
         self.git("checkout", "-q", "--detach", "HEAD", cwd=work)
@@ -284,6 +332,33 @@ class ScopeScriptTests(unittest.TestCase):
         self.assertIn("- a.txt (M; changed lines: 2)", result.stdout)
         self.assertNotIn("src/b.txt", result.stdout)
 
+    def test_diff_ending_at_older_commit_marks_later_changed_file_unavailable(self) -> None:
+        work = self.standard_repo()
+        self.write(work, "f.txt", "a\nb\nc\n")
+        self.commit_all(work, "two")
+        self.write(work, "f.txt", "a\nB\nc\n")
+        self.commit_all(work, "three")
+        self.write(work, "f.txt", "x\ny\nz\na\nB\nc\n")
+        self.commit_all(work, "four")
+
+        result = self.scope("diff", "HEAD~2", "HEAD~1", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- f.txt (M; changed lines unavailable, inspect git diff before editing)", result.stdout)
+        self.assertNotIn("changed lines: 2", result.stdout)
+
+    def test_diff_ending_at_older_commit_keeps_lines_for_unchanged_file(self) -> None:
+        work = self.standard_repo()
+        self.write(work, "a.txt", TEN_LINES.replace("2\n", "TWO\n"))
+        self.commit_all(work, "two")
+        self.write(work, "src/b.txt", "x\nY\nz\n")
+        self.commit_all(work, "three")
+
+        result = self.scope("diff", "HEAD~2", "HEAD~1", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- a.txt (M; changed lines: 2)", result.stdout)
+
     # -- files -----------------------------------------------------------
 
     def test_files_expands_directory_and_keeps_spaces(self) -> None:
@@ -335,6 +410,46 @@ class ScopeScriptTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("- src/b.txt (whole file in scope)", result.stdout)
+
+    def test_files_absolute_path_prints_repo_relative(self) -> None:
+        work = self.standard_repo()
+
+        result = self.scope("files", str(work / "src" / "b.txt"), cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- src/b.txt (whole file in scope)", result.stdout)
+        self.assertNotIn(str(work), result.stdout)
+
+        directory = self.scope("files", str(work / "src"), cwd=work)
+
+        self.assertEqual(directory.returncode, 0, directory.stderr)
+        self.assertIn("- src/b.txt (whole file in scope)", directory.stdout)
+
+    def test_files_absolute_path_from_a_subdirectory(self) -> None:
+        work = self.standard_repo()
+
+        result = self.scope("files", str(work / "src" / "b.txt"), cwd=work / "src")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- src/b.txt (whole file in scope)", result.stdout)
+
+    def test_files_normalizes_dot_dot_segments(self) -> None:
+        work = self.standard_repo()
+
+        result = self.scope("files", "src/../a.txt", cwd=work)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("- a.txt (whole file in scope)", result.stdout)
+
+    def test_files_outside_repository_exits_5(self) -> None:
+        work = self.standard_repo()
+        outside = self.write(self.base, "outside.txt", "outside\n")
+
+        for args in ((str(outside),), ("../outside.txt",), (str(self.base / "home"),)):
+            with self.subTest(path=args[0]):
+                result = self.scope("files", *args, cwd=work)
+                self.assertEqual(result.returncode, 5, result.stdout)
+                self.assertNotIn("outside.txt", result.stdout)
 
     def test_files_skips_deleted_tracked_file(self) -> None:
         work = self.standard_repo()

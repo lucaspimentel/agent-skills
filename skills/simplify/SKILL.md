@@ -38,9 +38,9 @@ Pick the mode from step 1; "Free-form arguments" below covers the rest:
 - free-form diff target: `diff BASE [END]`, where omitting `END` means the working tree
 - free-form whole-file target: `files PATH...`
 
-Add `--path <p>` (repeatable) to filter a diff target. The script expands whole-file paths itself, resolving them from the current directory (so a relative path still works from a subdirectory); the paths it prints are repository-root relative.
+Add `--path <p>` (repeatable) to filter a diff target. The script expands whole-file paths itself, resolving them from the current directory (so a relative path still works from a subdirectory); the paths it prints are repository-root relative. Paths outside the repository are rejected (exit 5).
 
-The script prints the scope list: one `Target:` line and one bullet per file. Substitute the whole list for `<scope list>` in step 3, and show the `Target:` line to the user as the resolved target. When PR detection fails, that line says the default branch was used; pass that on.
+The script prints the scope list: one `Target:` line and one bullet per file. Substitute the whole list for `<scope list>` in step 3, and show the `Target:` line to the user as the resolved target. When PR detection fails, that line says the default branch was used; pass that on. A branch with no PR is not a failure and gets no note.
 
 Exit codes to handle:
 
@@ -48,9 +48,9 @@ Exit codes to handle:
 - `2`: usage error. Re-check the invocation against the modes above.
 - `3`: not a git repository, or a detached HEAD for the default target. Stop and tell the user.
 - `4`: the base or default branch could not be resolved. Stop and tell the user what failed.
-- `5`: a named path does not exist or matches nothing. Stop and tell the user.
+- `5`: a named path does not exist, matches nothing, or lies outside the repository. Stop and tell the user.
 - `6`: a whole-file target matches more than 10 files. The script lists the matches on stderr. Ask whether to include them all, then rerun with `--allow-many`. **Non-interactive:** stop and list the matches.
-- `7`: the scope is empty. Tell the user there are no changes to simplify for the resolved target and stop.
+- `7`: the scope is empty (deleted files are not listed, so a diff that only deletes files is empty). Tell the user there are no changes to simplify for the resolved target and stop.
 
 ### Free-form arguments
 
@@ -102,11 +102,11 @@ Report each finding as `path:line`, a one-line summary, and the concrete cost (t
 
 ## Process
 
-1. **Baseline tests.** Find the project's test command before editing anything: check AGENTS.md or CLAUDE.md, then `package.json` scripts, a `*.sln`, a `Makefile`, or the equivalent build file. Run it and record any failures that already exist. If no test command is found, skip the tests steps and say so; do not guess.
-2. **Scoped pass.** Read each file and apply concrete improvements within the in-scope lines (dead code, unclear names, redundant logic, inconsistent patterns), one file at a time.
+1. **Baseline tests.** Find the project's test command before editing anything: check AGENTS.md or CLAUDE.md, then `package.json` scripts, a `*.sln`, a `Makefile`, or the equivalent build file. Run it and record any failures that already exist. If no test command is found, skip the test steps and say so; do not guess.
+2. **Scoped pass.** Read each file and apply concrete improvements within the in-scope lines (dead code, unclear names, redundant logic, inconsistent patterns), one file at a time. Before your first edit to a file, snapshot its current contents: copy it outside the repository (for example to a temporary directory) or keep its original text. The working tree may hold the user's uncommitted changes, so this snapshot is the only safe restore point. `git stash create` is not enough on its own: it misses untracked files, which are in scope as added files.
 3. **Auto tier.** Apply related out-of-scope edits that only remove dead code or redundant/stale comments. Do not apply any other out-of-scope edit in this step.
-4. **Tests.** Run the tests again. If a new failure appears, revert the edits in the implicated files, re-run, and list them in the summary as skipped with the reason. Run the configured formatter or linter over the changed files only; keep its edits inside the in-scope ranges and route any formatting churn outside the scope to the confirmed batch (step 5).
-5. **Confirmed batch.** Collect the remaining related out-of-scope findings (renames, restructuring, consolidation, altitude fixes, and anything beyond dead code and comments). List them with `path:line` references and ask once which to apply. Apply only the approved ones, then run the tests again. Skip this step if there are no findings or every line is in scope. **Non-interactive:** do not apply them; list them in the summary as suggestions.
+4. **Tests.** Run the tests again. If a new failure appears, restore each implicated file from its snapshot so only your own edits are undone, re-run, and list those edits in the summary as skipped with the reason. Never run `git checkout`, `git restore`, `git reset`, `git stash` (push or pop), or `git clean` on the user's files: they would discard uncommitted work that is not yours. Run the configured formatter or linter over the changed files only; keep its edits inside the in-scope ranges and route any formatting churn outside the scope to the confirmed batch (step 5).
+5. **Confirmed batch.** Collect the remaining related out-of-scope findings (renames, restructuring, consolidation, altitude fixes, and anything beyond dead code and comments). List them with `path:line` references and ask once which to apply. Apply only the approved ones, then run the tests again, and undo any approved edit that causes a new failure from its snapshot the same way. Skip this step if there are no findings or every line is in scope. **Non-interactive:** do not apply them; list them in the summary as suggestions.
 6. **Summarize** what changed and why, grouped by stage: baseline test results, scoped pass, auto tier (list every auto-applied out-of-scope edit explicitly), tests, and confirmed batch. List every skipped finding with its reason.
 
 ### Large diffs

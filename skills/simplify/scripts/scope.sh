@@ -20,7 +20,7 @@
 #   2  usage error
 #   3  not a git repository, or a detached HEAD for the default target
 #   4  the base, end, or default branch could not be resolved
-#   5  a named path does not exist or matches nothing
+#   5  a named path does not exist, matches nothing, or is outside the repository
 #   6  a whole-file target matches more than MAX_WHOLE_FILES files
 #   7  the scope is empty
 set -euo pipefail
@@ -62,9 +62,15 @@ resolve_default_base() {
   branch=$(git symbolic-ref -q --short HEAD) || branch=""
   [[ -n $branch ]] || die 3 "HEAD is detached; pass an explicit commit, range, or paths"
 
-  local pr_state="" pr_base_ref="" pr_base_oid="" pr_fields=""
+  local pr_state="" pr_base_ref="" pr_base_oid="" pr_fields="" pr_lookup=failed
   if command -v gh >/dev/null 2>&1; then
-    if pr_fields=$(GH_PROMPT_DISABLED=1 GH_NO_UPDATE_NOTIFIER=1 gh pr view --json state,baseRefName,baseRefOid --jq '.state, .baseRefName, .baseRefOid' 2>/dev/null); then
+    # gh reports "no pull requests found" on stderr, and that only means the
+    # branch has no PR. Capture stderr on the side, because merging it into
+    # stdout would corrupt the three lines read below.
+    local gh_err="" gh_err_file=""
+    gh_err_file=$(mktemp "${TMPDIR:-/tmp}/scope-gh.XXXXXX" 2>/dev/null) || gh_err_file=""
+    if pr_fields=$(GH_PROMPT_DISABLED=1 GH_NO_UPDATE_NOTIFIER=1 gh pr view --json state,baseRefName,baseRefOid --jq '.state, .baseRefName, .baseRefOid' 2>"${gh_err_file:-/dev/null}"); then
+      pr_lookup=ok
       {
         read -r pr_state
         read -r pr_base_ref
@@ -73,7 +79,13 @@ resolve_default_base() {
       [[ $pr_state == null ]] && pr_state=""
       [[ $pr_base_ref == null ]] && pr_base_ref=""
       [[ $pr_base_oid == null ]] && pr_base_oid=""
+    elif [[ -n $gh_err_file ]]; then
+      gh_err=$(cat "$gh_err_file" 2>/dev/null) || gh_err=""
+      if [[ $gh_err == *"no pull requests found"* ]]; then
+        pr_lookup=none
+      fi
     fi
+    [[ -z $gh_err_file ]] || rm -f "$gh_err_file"
   fi
 
   local pr_note=""
@@ -91,7 +103,7 @@ resolve_default_base() {
       return 0
     fi
     pr_note=" (PR base ${pr_base_oid:0:7} unavailable; using the default branch)"
-  elif [[ -z $pr_state ]]; then
+  elif [[ -z $pr_state && $pr_lookup != none ]]; then
     pr_note=" (PR detection unavailable; using the default branch)"
   fi
 
@@ -121,16 +133,17 @@ resolve_default_base() {
 
 declare -a FILE_STATUS=()
 declare -a FILE_PATH=()
-UNCOMMITTED=""
+CHANGED_SINCE_END=""
 
-# Load the set of files that differ from HEAD once per run: a per-file
-# `git diff --quiet` costs an extra process for every file in a commit target.
-load_uncommitted_files() {
-  UNCOMMITTED=$(g diff --name-only HEAD 2>/dev/null) || UNCOMMITTED=""
+# Load once per run the files whose working-tree content differs from END:
+# their ranges describe END's version, so they would not match the current
+# file. A per-file `git diff --quiet` would cost one process per file.
+load_changed_since_end() {
+  CHANGED_SINCE_END=$(g diff --name-only "$END" 2>/dev/null) || CHANGED_SINCE_END=""
 }
 
-is_uncommitted() {
-  case $'\n'"$UNCOMMITTED"$'\n' in
+changed_since_end() {
+  case $'\n'"$CHANGED_SINCE_END"$'\n' in
     *$'\n'"$1"$'\n'*) return 0 ;;
   esac
   return 1
@@ -150,6 +163,12 @@ list_changed_files() {
       [A-Z])
         local path=""
         IFS= read -r -d '' path || true
+        # Read the path token either way so the NUL-separated stream stays
+        # aligned, then skip deletions: the file is gone, so there is nothing
+        # to simplify. A diff made only of deletions ends up with no files.
+        if [[ $tok == D ]]; then
+          continue
+        fi
         FILE_STATUS+=("$tok")
         FILE_PATH+=("$path")
         ;;
@@ -261,7 +280,7 @@ print_scope_list() {
       printf -- '- %s (added; entire file is in scope)\n' "$path"
       continue
     fi
-    if [[ -n $END ]] && is_uncommitted "$path"; then
+    if [[ -n $END ]] && changed_since_end "$path"; then
       printf -- '- %s (%s; changed lines unavailable, inspect git diff before editing)\n' "$path" "$status"
       continue
     fi
@@ -319,12 +338,41 @@ pathspec_for() {
   esac
 }
 
+# to_repo_relative prints an existing path relative to the repository root, or
+# fails when it lies outside this repository (including a nested repository).
+to_repo_relative() {
+  local p=$1 dir name="" top prefix
+  if [[ -d $p ]]; then
+    dir=$p
+  else
+    dir=${p%[/\\]*}
+    if [[ $dir == "$p" ]]; then
+      dir=.
+    elif [[ -z $dir ]]; then
+      dir=/
+    fi
+    name=${p##*[/\\]}
+  fi
+  top=$(cd "$dir" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null) || return 1
+  [[ $top == "$REPO_ROOT" ]] || return 1
+  prefix=$(cd "$dir" && git rev-parse --show-prefix 2>/dev/null) || return 1
+  p=${prefix}${name}
+  p=${p%/}
+  printf '%s' "${p:-.}"
+}
+
 collect_whole_files() {
-  local arg matched p spec
+  local arg matched p rel spec
   for arg in "$@"; do
-    if [[ -f $arg ]]; then
-      WHOLE_FILES+=("$arg")
-      continue
+    # Normalize an existing path through git, which handles symlinks, Windows
+    # drive paths, and '..' segments, and rejects anything outside the repo.
+    if [[ -e $arg ]]; then
+      rel=$(to_repo_relative "$arg") || die 5 "path is outside the repository: $arg"
+      if [[ -f $rel ]]; then
+        WHOLE_FILES+=("$rel")
+        continue
+      fi
+      arg=$rel
     fi
     spec=$(pathspec_for "$arg")
     # Tracked files that are gone from the working tree are not in scope.
@@ -532,7 +580,7 @@ if [[ ${#FILE_PATH[@]} -eq 0 ]]; then
 fi
 
 if [[ -n $END ]]; then
-  load_uncommitted_files
+  load_changed_since_end
 fi
 
 print_scope_list
