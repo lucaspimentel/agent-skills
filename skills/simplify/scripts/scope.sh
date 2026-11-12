@@ -203,9 +203,10 @@ compute_ranges() {
       saw_hunk=1
       c=${BASH_REMATCH[4]}
       d=${BASH_REMATCH[6]:-1}
-      [[ $d == 0 ]] && continue
-      starts+=("$c")
-      ends+=("$((c + d - 1))")
+      if [[ $d != 0 ]]; then
+        starts+=("$c")
+        ends+=("$((c + d - 1))")
+      fi
     fi
   done <<<"$diff_out"
 
@@ -215,6 +216,14 @@ compute_ranges() {
     else
       printf 'DELETIONS'
     fi
+    return 0
+  fi
+
+  # Every hunk was a pure deletion. Return before expanding the empty arrays,
+  # because `set -u` plus an empty `"${arr[@]}"` is an error in bash 3.2, which
+  # macOS still ships.
+  if [[ ${#starts[@]} -eq 0 ]]; then
+    printf 'DELETIONS'
     return 0
   fi
 
@@ -317,7 +326,9 @@ dedup_whole_files() {
   WHOLE_FILES=()
   local p
   while IFS= read -r p; do
-    [[ -n $p ]] && WHOLE_FILES+=("$p")
+    if [[ -n $p ]]; then
+      WHOLE_FILES+=("$p")
+    fi
   done <<<"$sorted"
 }
 
