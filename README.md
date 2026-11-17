@@ -21,7 +21,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 | `zsa-layouts` | Fetch, render, diff, and evaluate ZSA keyboard layouts from Oryx | `/agent-skills:zsa-layouts` |
 | `git-clean-worktrees` | Remove preserved linked worktrees and local branches from one repository, through a digest-approved plan | `/agent-skills:git-clean-worktrees` |
 | `plan` | Self-contained implementation plan as a handoff prompt | `/agent-skills:plan` |
-| `grill-me` | Relentless design interview until no ambiguities remain | `/agent-skills:grill-me` |
+| `grill-me` | Relentless design interview until no ambiguities remain | Model-invoked |
 | `tdd` | Test-driven red-green-refactor loop with test-quality rules | Model-invoked |
 | `diagnosing-bugs` | Diagnosis loop for hard bugs: build and tighten a feedback loop | Model-invoked |
 | `session-handoff` | Compact the current conversation into a handoff document | `/agent-skills:session-handoff` |
@@ -29,7 +29,7 @@ Coding-agent skills shared between [Claude Code](https://code.claude.com/docs/en
 
 `grill-me`, `tdd`, `diagnosing-bugs`, `session-handoff`, and `writing-for-agents` are derived from [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed. See `NOTICE` and the `LICENSE` file in each skill directory.
 
-Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly. Installed as a Claude Code plugin, every skill is namespaced under the plugin: `/agent-skills:<name>`. In pi, the form is `/skill:<name>`. `git-commit`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions, and can still be run by name.
+Most skills set `disable-model-invocation: true`, so they run only when invoked explicitly. Installed as a Claude Code plugin, every skill is namespaced under the plugin: `/agent-skills:<name>`. In pi, the form is `/skill:<name>`. `git-commit`, `grill-me`, `tdd`, `diagnosing-bugs`, and `writing-for-agents` are model-invoked from their trigger descriptions, and can still be run by name.
 
 Claude Code ships its own bundled `simplify` skill, so typing `/simplify` runs that one; this repo's is `/agent-skills:simplify`.
 

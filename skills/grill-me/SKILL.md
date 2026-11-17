@@ -1,7 +1,6 @@
 ---
 name: grill-me
-description: "A relentless interview about a design that continues until no ambiguities remain. Invoke explicitly by name when you want a plan, architecture, API, or design stress-tested with questions before implementation."
-disable-model-invocation: true
+description: "A relentless interview about a design that continues until no ambiguities remain. Use when the user asks to be grilled, or when a plan, architecture, API, or design should be stress-tested with questions before implementation."
 ---
 
 <!-- Based on "grilling" from https://github.com/mattpocock/skills, MIT licensed. -->
